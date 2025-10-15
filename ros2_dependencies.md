@@ -6,12 +6,32 @@ These must be installed via `apt` after installing ROS 2 Humble.
 ## Core ROS 2 Installation
 
 ```bash
-# Install ROS 2 Humble (Ubuntu 22.04)
+# Install ROS 2 Humble (Ubuntu 22.04) - GPG Key Fix Included
 sudo apt update && sudo apt install curl gnupg lsb-release
+
+# IMPORTANT: Clean up any existing problematic ROS setup first
+sudo rm -f /etc/apt/sources.list.d/ros2.list
+sudo rm -f /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Download ROS 2 GPG key to the correct location
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Verify the key was downloaded successfully
+ls -la /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Add ROS 2 repository with proper GPG key reference
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
+# Update package lists (should work without GPG errors now)
 sudo apt update
+
+# If you still get GPG errors, use this alternative method:
+# sudo apt install software-properties-common
+# curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+# sudo apt-add-repository "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main"
+# sudo apt update
+
+# Install ROS 2 Humble desktop
 sudo apt install ros-humble-desktop
 ```
 
@@ -102,4 +122,38 @@ colcon build
 
 # Source the workspace
 source install/setup.bash
+```
+
+## Troubleshooting ROS 2 Installation
+
+### GPG Key Errors
+If you see errors like "NO_PUBKEY F42ED6FBAB17C654" or "repository is not signed":
+
+```bash
+# Clean up existing setup
+sudo rm -f /etc/apt/sources.list.d/ros2.list
+sudo rm -f /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Try the installation again with the updated method above
+# Or use the legacy method:
+sudo apt install software-properties-common
+curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt-add-repository "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main"
+sudo apt update
+sudo apt install ros-humble-desktop
+```
+
+### Network Issues
+If downloads fail:
+```bash
+# Try different mirror
+sudo sed -i 's|packages.ros.org|packages.osrfoundation.org|g' /etc/apt/sources.list.d/ros2.list
+sudo apt update
+```
+
+### Permission Issues
+```bash
+# Ensure proper permissions
+sudo chown root:root /usr/share/keyrings/ros-archive-keyring.gpg
+sudo chmod 644 /usr/share/keyrings/ros-archive-keyring.gpg
 ```

@@ -33,13 +33,43 @@ The Emu Droid is an open-source bipedal companion robot designed to demonstrate 
 
 **⚠️ IMPORTANT: Install ROS 2 Humble BEFORE running pip install!**
 
+#### Quick Fix Script (Recommended)
 ```bash
-# Install ROS 2 Humble (Ubuntu 22.04)
+# Run our automated GPG keyring fix script
+./scripts/fix_ros_keyring.sh
+
+# Then install ROS 2
+sudo apt install ros-humble-desktop
+```
+
+#### Manual Installation (Alternative)
+```bash
+# Install ROS 2 Humble (Ubuntu 22.04) - GPG Key Fix Included
 sudo apt update && sudo apt install curl gnupg lsb-release
+
+# IMPORTANT: Clean up any existing problematic ROS setup first
+sudo rm -f /etc/apt/sources.list.d/ros2.list
+sudo rm -f /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Download ROS 2 GPG key to the correct location
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Verify the key was downloaded successfully
+ls -la /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Add ROS 2 repository with proper GPG key reference
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
+# Update package lists (should work without GPG errors now)
 sudo apt update
+
+# If you still get GPG errors, use this alternative method:
+# sudo apt install software-properties-common
+# curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+# sudo apt-add-repository "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main"
+# sudo apt update
+
+# Install ROS 2 Humble desktop
 sudo apt install ros-humble-desktop
 
 # Install additional ROS 2 packages
@@ -135,6 +165,8 @@ mu-bot/
 │   ├── worlds/             # Testing environments
 │   ├── urdf/               # Robot model definitions
 │   └── launch/             # Simulation launch files
+├── scripts/                # Utility scripts
+│   └── fix_ros_keyring.sh  # GPG keyring fix script
 ├── ai/                     # AI model pipeline
 │   ├── hailo/              # Hailo model compilation
 │   ├── pytorch/            # Custom model training
@@ -367,6 +399,36 @@ source /opt/ros/humble/setup.bash
 
 # Then install Python packages
 pip install -r requirements.txt
+```
+
+#### "GPG error: NO_PUBKEY F42ED6FBAB17C654" or "repository is not signed"
+**Problem**: ROS 2 GPG key verification failure
+**Solution**: Use our automated fix script or manual steps
+
+**Quick Fix:**
+```bash
+# Run the automated GPG keyring fix
+./scripts/fix_ros_keyring.sh
+```
+
+**Manual Fix:**
+```bash
+# Remove existing sources and try again
+sudo rm -f /etc/apt/sources.list.d/ros2.list
+sudo rm -f /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Method 1: Use the updated keyring method
+sudo apt update && sudo apt install curl gnupg lsb-release
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# Method 2: If Method 1 fails, use legacy apt-key method
+# sudo apt install software-properties-common
+# curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+# sudo apt-add-repository "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main"
+
+sudo apt update
+sudo apt install ros-humble-desktop
 ```
 
 #### "Package 'emu_vision' not found"
