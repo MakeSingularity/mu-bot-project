@@ -1,0 +1,154 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "colcon: build",
+            "type": "shell",
+            "command": "colcon",
+            "args": ["build", "--symlink-install"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "colcon: test",
+            "type": "shell", 
+            "command": "colcon",
+            "args": ["test"],
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "colcon: test-result",
+            "type": "shell",
+            "command": "colcon", 
+            "args": ["test-result", "--all"],
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "colcon: test"
+        },
+        {
+            "label": "ROS: source setup",
+            "type": "shell",
+            "command": "source",
+            "args": ["install/setup.bash"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build"
+        },
+        {
+            "label": "Gazebo: launch simulation",
+            "type": "shell",
+            "command": "ros2",
+            "args": ["launch", "sim/launch/emu_gazebo.launch.py"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "ROS: launch emu vision",
+            "type": "shell",
+            "command": "ros2",
+            "args": ["launch", "emu_vision", "emu_vision_launch.py"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always", 
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Hailo: compile models",
+            "type": "shell",
+            "command": "python3",
+            "args": ["compile_hailo_models.py", "--all"],
+            "options": {
+                "cwd": "${workspaceFolder}/ai/hailo"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Hardware: test servo control",
+            "type": "shell",
+            "command": "python3",
+            "args": ["tests/test_servo_control.py"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test"
+        },
+        {
+            "label": "Hardware: test cameras",
+            "type": "shell",
+            "command": "python3", 
+            "args": ["tests/test_stereo_cameras.py"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test"
+        },
+        {
+            "label": "Format: Python (black)",
+            "type": "shell",
+            "command": "black",
+            "args": ["src/", "ai/", "tests/"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build"
+        },
+        {
+            "label": "Clean: build artifacts",
+            "type": "shell",
+            "command": "rm",
+            "args": ["-rf", "build/", "install/", "log/"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build"
+        }
+    ]
+}

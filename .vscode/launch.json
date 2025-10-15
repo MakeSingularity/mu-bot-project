@@ -1,0 +1,60 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: ROS 2 Node",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src:${env:PYTHONPATH}",
+                "ROS_DOMAIN_ID": "0"
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python: Emu Observer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/emu_vision/emu_vision/emu_observer.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src:${env:PYTHONPATH}",
+                "ROS_DOMAIN_ID": "0"
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python: Hailo Model Compiler",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ai/hailo/compile_hailo_models.py",
+            "console": "integratedTerminal",
+            "args": ["--model", "yolov8n"],
+            "cwd": "${workspaceFolder}/ai/hailo"
+        },
+        {
+            "name": "Python: PyTorch Training",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ai/pytorch/train_custom_models.py",
+            "console": "integratedTerminal",
+            "args": ["--model", "activity_classifier", "--dataset", "./mock_data"],
+            "cwd": "${workspaceFolder}/ai/pytorch"
+        },
+        {
+            "name": "Python: Hardware Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/test_servo_control.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}"
+            },
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

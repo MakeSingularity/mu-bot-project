@@ -1,0 +1,91 @@
+{
+    "files.associations": {
+        "*.launch.py": "python",
+        "*.urdf": "xml",
+        "*.xacro": "xml",
+        "*.sdf": "xml",
+        "*.world": "xml",
+        "*.yaml": "yaml",
+        "*.yml": "yaml"
+    },
+    "python.defaultInterpreterPath": "./venv/bin/python",
+    "python.autoComplete.extraPaths": [
+        "./src",
+        "/opt/ros/humble/lib/python3.10/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "./src",
+        "/opt/ros/humble/lib/python3.10/site-packages"
+    ],
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=100",
+        "--ignore=E203,W503"
+    ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length=100"
+    ],
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+        100
+    ],
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "ros.distro": "humble",
+    "cmake.configureOnOpen": false,
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**",
+        "/opt/ros/humble/include/**"
+    ],
+    "C_Cpp.default.defines": [
+        "ROS_DISTRO_HUMBLE"
+    ],
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.cppStandard": "c++17",
+    "terminal.integrated.env.linux": {
+        "ROS_DOMAIN_ID": "0",
+        "RMW_IMPLEMENTATION": "rmw_cyclonedx_cpp"
+    },
+    "search.exclude": {
+        "**/build": true,
+        "**/install": true,
+        "**/log": true,
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/*.pyc": true,
+        "**/__pycache__": true
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/build": true,
+        "**/install": true,
+        "**/log": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
+    "git.ignoreLimitWarning": true,
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/ros2/rcl_interfaces/master/builtin_interfaces/msg/Time.msg": "*.yaml"
+    },
+    "extensions.recommendations": [
+        "ms-python.python",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-json",
+        "streetsidesoftware.code-spell-checker"
+    ]
+}

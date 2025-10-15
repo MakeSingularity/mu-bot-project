@@ -1,0 +1,40 @@
+# Emu Vision Configuration
+# Configuration parameters for emu droid vision system
+
+emu_observer:
+  ros__parameters:
+    # Camera settings
+    camera_fps: 30.0                    # Camera capture frame rate
+    processing_fps: 10.0                # Energy-efficient processing rate
+    
+    # Detection parameters  
+    detection_confidence: 0.7           # Minimum confidence for human detection
+    tracking_distance_max: 10.0         # Maximum tracking distance (meters)
+    
+    # Speed thresholds for activity classification
+    speed_threshold_walk: 1.0           # Walking threshold (m/s)
+    speed_threshold_run: 3.0            # Running threshold (m/s)
+    
+    # Stereo camera parameters (Arducam 5MP OV5647)
+    stereo_baseline: 0.12               # Distance between cameras (meters)
+    camera_focal_length: 3.04           # Focal length in mm
+    
+    # Energy management
+    standby_timeout: 30.0               # Standby mode timeout (seconds)
+    low_power_fps: 2.0                  # Frame rate in low power mode
+    
+    # Hailo AI settings
+    hailo_model_path: "/opt/hailo/models/"
+    pose_estimation_model: "yolov8n_pose.hef"
+    object_detection_model: "yolov8n.hef"
+    hailo_batch_size: 1
+    hailo_device_id: 0
+    
+    # Publishing settings
+    publish_detection_image: true       # Publish annotated images
+    publish_debug_info: false           # Publish debug information
+    
+    # Frame IDs
+    left_camera_frame: "left_camera_optical_frame"
+    right_camera_frame: "right_camera_optical_frame"
+    base_frame: "base_link"

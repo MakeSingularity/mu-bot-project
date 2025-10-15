@@ -1,0 +1,188 @@
+# Emu Droid Project - Git Ignore Rules
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# ROS 2 Build Artifacts
+build/
+install/
+log/
+*.bag
+*.db3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyTorch / Machine Learning
+*.pth
+*.onnx
+*.hef
+*.har
+checkpoints/
+datasets/
+models/*.pt
+models/*.onnx
+models/*.hef
+runs/
+logs/
+tensorboard_logs/
+
+# 3D Printing / CAD Files (Large Binary Files)
+*.stl
+*.obj
+*.ply
+*.3mf
+*.gcode
+*.step
+*.stp
+*.iges
+*.igs
+
+# Simulation / Gazebo
+gazebo/
+.gazebo/
+*.world~
+*.sdf~
+
+# Hardware Development
+*.fzz
+*.fzpz
+*.sch
+*.brd
+*.kicad_*
+*.net
+*.pro
+*.pcb
+
+# IDE / Editor Files
+.vscode/settings.json.user
+.idea/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.pydevproject
+
+# Documentation Build
+docs/_build/
+docs/build/
+*.pdf
+*.eps
+
+# Test Results and Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+test-results/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Logs and Temporary Files
+*.log
+*.tmp
+*.temp
+*.pid
+*.lock
+.cache/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled Object Files
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Package Files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Hardware Test Data
+test_data/
+calibration_data/
+recording_*.wav
+recording_*.mp4
+captured_*.jpg
+captured_*.png
+
+# AI Training Data (Large datasets)
+training_data/
+validation_data/
+test_data/
+annotations/
+*.dataset
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# System and Hardware Specific
+.ssh/
+*.key
+*.pem
+*.crt
+*.p12
+
+# Backup Files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Custom Project Exclusions
+scratch/
+experiments/
+deprecated/
+archive/
+
+# Sensitive Configuration
+config/secrets.yaml
+config/private.yaml
+hardware/private_keys/
+credentials.json
+
+# Large Media Files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.mp3
+*.wav
+*.flac
+
+# Temporary build and test outputs
+output/
+results/
+reports/

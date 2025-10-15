@@ -1,0 +1,600 @@
+<?xml version="1.0"?>
+<robot name="emu_droid" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Properties and Constants -->
+  <xacro:property name="pi" value="3.14159265359"/>
+  <xacro:property name="body_height" value="0.8"/>
+  <xacro:property name="body_width" value="0.3"/>
+  <xacro:property name="body_depth" value="0.25"/>
+  <xacro:property name="leg_length" value="0.6"/>
+  <xacro:property name="foot_size" value="0.2"/>
+  <xacro:property name="neck_length" value="0.4"/>
+  <xacro:property name="head_size" value="0.15"/>
+  <xacro:property name="eye_baseline" value="0.12"/>
+  
+  <!-- Material Definitions -->
+  <material name="aluminum">
+    <color rgba="0.8 0.8 0.9 1.0"/>
+  </material>
+  
+  <material name="black_plastic">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+  
+  <material name="camera_black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+  
+  <material name="servo_blue">
+    <color rgba="0.0 0.3 0.8 1.0"/>
+  </material>
+
+  <!-- Macro for 2020 Aluminum Extrusion -->
+  <xacro:macro name="aluminum_beam" params="name length">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <box size="0.02 0.02 ${length}"/>
+        </geometry>
+        <material name="aluminum"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.02 0.02 ${length}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- Macro for SG90 Servo -->
+  <xacro:macro name="sg90_servo" params="name">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <box size="0.023 0.012 0.029"/>
+        </geometry>
+        <material name="servo_blue"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.023 0.012 0.029"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.009"/>
+        <inertia ixx="0.00001" iyy="0.00001" izz="0.00001" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- Base Link (Main Body) -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${body_width} ${body_depth} ${body_height}"/>
+      </geometry>
+      <material name="black_plastic"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${body_width} ${body_depth} ${body_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="5.0"/>
+      <inertia ixx="0.5" iyy="0.5" izz="0.3" ixy="0" ixz="0" iyz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+
+  <!-- Left Leg Assembly -->
+  <link name="left_hip">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.05"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.03" length="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Left Upper Leg (2020 Aluminum) -->
+  <xacro:aluminum_beam name="left_upper_leg" length="${leg_length/2}"/>
+
+  <!-- Left Lower Leg (2020 Aluminum) -->
+  <xacro:aluminum_beam name="left_lower_leg" length="${leg_length/2}"/>
+
+  <!-- Left Foot -->
+  <link name="left_foot">
+    <visual>
+      <geometry>
+        <box size="${foot_size} ${foot_size/2} 0.02"/>
+      </geometry>
+      <material name="black_plastic"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_size} ${foot_size/2} 0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Right Leg Assembly (Mirror of Left) -->
+  <link name="right_hip">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.05"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.03" length="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <xacro:aluminum_beam name="right_upper_leg" length="${leg_length/2}"/>
+  <xacro:aluminum_beam name="right_lower_leg" length="${leg_length/2}"/>
+
+  <link name="right_foot">
+    <visual>
+      <geometry>
+        <box size="${foot_size} ${foot_size/2} 0.02"/>
+      </geometry>
+      <material name="black_plastic"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_size} ${foot_size/2} 0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Neck Assembly -->
+  <link name="neck_base">
+    <visual>
+      <geometry>
+        <cylinder radius="0.025" length="0.05"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.025" length="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <link name="neck_segment">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="${neck_length}"/>
+      </geometry>
+      <material name="black_plastic"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.015" length="${neck_length}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Head Assembly -->
+  <link name="head">
+    <visual>
+      <geometry>
+        <box size="${head_size} ${head_size} ${head_size}"/>
+      </geometry>
+      <material name="black_plastic"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${head_size} ${head_size} ${head_size}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.8"/>
+      <inertia ixx="0.01" iyy="0.01" izz="0.01" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Left Eye Assembly -->
+  <link name="left_eye_platform">
+    <visual>
+      <geometry>
+        <cylinder radius="0.03" length="0.01"/>
+      </geometry>
+      <material name="black_plastic"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.03" length="0.01"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <link name="left_camera">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.025 0.009"/>
+      </geometry>
+      <material name="camera_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.025 0.025 0.009"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.003"/>
+      <inertia ixx="0.00001" iyy="0.00001" izz="0.00001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Right Eye Assembly -->
+  <link name="right_eye_platform">
+    <visual>
+      <geometry>
+        <cylinder radius="0.03" length="0.01"/>
+      </geometry>
+      <material name="black_plastic"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.03" length="0.01"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <link name="right_camera">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.025 0.009"/>
+      </geometry>
+      <material name="camera_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.025 0.025 0.009"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.003"/>
+      <inertia ixx="0.00001" iyy="0.00001" izz="0.00001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Joint Definitions -->
+  
+  <!-- Hip Joints -->
+  <joint name="left_hip_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="left_hip"/>
+    <origin xyz="0 ${body_depth/2 + 0.025} ${-body_height/2}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.57" upper="1.57" effort="10" velocity="5"/>
+  </joint>
+
+  <joint name="right_hip_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="right_hip"/>
+    <origin xyz="0 ${-body_depth/2 - 0.025} ${-body_height/2}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.57" upper="1.57" effort="10" velocity="5"/>
+  </joint>
+
+  <!-- Knee Joints -->
+  <joint name="left_knee_joint" type="revolute">
+    <parent link="left_hip"/>
+    <child link="left_upper_leg"/>
+    <origin xyz="0 0 ${-leg_length/4}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-2.0" upper="0.1" effort="10" velocity="5"/>
+  </joint>
+
+  <joint name="right_knee_joint" type="revolute">
+    <parent link="right_hip"/>
+    <child link="right_upper_leg"/>
+    <origin xyz="0 0 ${-leg_length/4}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-2.0" upper="0.1" effort="10" velocity="5"/>
+  </joint>
+
+  <!-- Ankle Joints -->
+  <joint name="left_ankle_joint" type="revolute">
+    <parent link="left_upper_leg"/>
+    <child link="left_lower_leg"/>
+    <origin xyz="0 0 ${-leg_length/4}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="1.5" effort="10" velocity="5"/>
+  </joint>
+
+  <joint name="right_ankle_joint" type="revolute">
+    <parent link="right_upper_leg"/>
+    <child link="right_lower_leg"/>
+    <origin xyz="0 0 ${-leg_length/4}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="1.5" effort="10" velocity="5"/>
+  </joint>
+
+  <!-- Foot Joints -->
+  <joint name="left_foot_joint" type="revolute">
+    <parent link="left_lower_leg"/>
+    <child link="left_foot"/>
+    <origin xyz="0 0 ${-leg_length/4}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="5" velocity="5"/>
+  </joint>
+
+  <joint name="right_foot_joint" type="revolute">
+    <parent link="right_lower_leg"/>
+    <child link="right_foot"/>
+    <origin xyz="0 0 ${-leg_length/4}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="5" velocity="5"/>
+  </joint>
+
+  <!-- Neck Joints -->
+  <joint name="neck_base_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="neck_base"/>
+    <origin xyz="0 0 ${body_height/2 + 0.025}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.57" upper="1.57" effort="5" velocity="2"/>
+  </joint>
+
+  <joint name="neck_joint" type="continuous">
+    <parent link="neck_base"/>
+    <child link="neck_segment"/>
+    <origin xyz="0 0 ${neck_length/2 + 0.025}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- Head Joint -->
+  <joint name="head_joint" type="revolute">
+    <parent link="neck_segment"/>
+    <child link="head"/>
+    <origin xyz="0 0 ${neck_length/2 + head_size/2}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.785" upper="0.785" effort="2" velocity="2"/>
+  </joint>
+
+  <!-- Eye Platform Joints (Stewart Platform Simulation) -->
+  <joint name="left_eye_joint" type="revolute">
+    <parent link="head"/>
+    <child link="left_eye_platform"/>
+    <origin xyz="${-eye_baseline/2} 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.3" upper="0.3" effort="1" velocity="2"/>
+  </joint>
+
+  <joint name="right_eye_joint" type="revolute">
+    <parent link="head"/>
+    <child link="right_eye_platform"/>
+    <origin xyz="${eye_baseline/2} 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.3" upper="0.3" effort="1" velocity="2"/>
+  </joint>
+
+  <!-- Camera Joints -->
+  <joint name="left_camera_joint" type="fixed">
+    <parent link="left_eye_platform"/>
+    <child link="left_camera"/>
+    <origin xyz="0 0 0.015" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="right_camera_joint" type="fixed">
+    <parent link="right_eye_platform"/>
+    <child link="right_camera"/>
+    <origin xyz="0 0 0.015" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Gazebo-specific elements -->
+  <gazebo reference="base_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="left_camera">
+    <sensor type="camera" name="left_camera">
+      <update_rate>30.0</update_rate>
+      <camera name="left">
+        <horizontal_fov>1.085</horizontal_fov>
+        <image>
+          <width>1920</width>
+          <height>1080</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+      </camera>
+      <plugin name="left_camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>camera/left</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>left_camera_optical_frame</frameName>
+        <hackBaseline>0.12</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="right_camera">
+    <sensor type="camera" name="right_camera">
+      <update_rate>30.0</update_rate>
+      <camera name="right">
+        <horizontal_fov>1.085</horizontal_fov>
+        <image>
+          <width>1920</width>
+          <height>1080</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+      </camera>
+      <plugin name="right_camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>camera/right</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>right_camera_optical_frame</frameName>
+        <hackBaseline>0.12</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ROS 2 Control -->
+  <ros2_control name="emu_droid_system" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    
+    <!-- Joint interfaces for leg control -->
+    <joint name="left_hip_joint">
+      <command_interface name="position">
+        <param name="min">-1.57</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="left_knee_joint">
+      <command_interface name="position">
+        <param name="min">-2.0</param>
+        <param name="max">0.1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="left_ankle_joint">
+      <command_interface name="position">
+        <param name="min">-0.5</param>
+        <param name="max">1.5</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="right_hip_joint">
+      <command_interface name="position">
+        <param name="min">-1.57</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="right_knee_joint">
+      <command_interface name="position">
+        <param name="min">-2.0</param>
+        <param name="max">0.1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="right_ankle_joint">
+      <command_interface name="position">
+        <param name="min">-0.5</param>
+        <param name="max">1.5</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <!-- Neck and head control -->
+    <joint name="neck_base_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="head_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <!-- Eye platform control -->
+    <joint name="left_eye_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="right_eye_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find emu_droid_control)/config/emu_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>
