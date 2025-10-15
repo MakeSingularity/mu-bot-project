@@ -29,7 +29,38 @@ The Emu Droid is an open-source bipedal companion robot designed to demonstrate 
 - Python 3.10 or higher
 - Git and basic development tools
 
-### 1. Repository Setup
+### 1. ROS 2 Installation (Required First!)
+
+**⚠️ IMPORTANT: Install ROS 2 Humble BEFORE running pip install!**
+
+```bash
+# Install ROS 2 Humble (Ubuntu 22.04)
+sudo apt update && sudo apt install curl gnupg lsb-release
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+sudo apt update
+sudo apt install ros-humble-desktop
+
+# Install additional ROS 2 packages
+sudo apt install \
+    ros-humble-gazebo-ros-pkgs \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher \
+    ros-humble-xacro \
+    python3-colcon-common-extensions \
+    python3-rosdep
+
+# Initialize rosdep
+sudo rosdep init
+rosdep update
+
+# Source ROS 2 (add to ~/.bashrc for permanent setup)
+source /opt/ros/humble/setup.bash
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+```
+
+### 2. Repository Setup
 ```bash
 # Clone the repository
 git clone https://github.com/makesingularity/mu-bot-project.git
@@ -39,22 +70,29 @@ cd mu-bot-project
 python3 -m venv venv
 source venv/bin/activate
 
-# Install dependencies
+# Install Python dependencies (ROS 2 packages excluded)
 pip install -r requirements.txt
 ```
 
-### 2. ROS 2 Environment Setup
+### 3. ROS 2 Workspace Setup
 ```bash
-# Source ROS 2 Humble
+# Make sure ROS 2 is sourced
 source /opt/ros/humble/setup.bash
 
+# Install workspace-specific dependencies
+rosdep install --from-paths src --ignore-src -r -y
+
 # Build ROS packages
-cd src
 colcon build --symlink-install
+
+# Source the workspace
 source install/setup.bash
+
+# Add workspace to auto-source (optional)
+echo "source $(pwd)/install/setup.bash" >> ~/.bashrc
 ```
 
-### 3. Hardware Assembly (Optional)
+### 4. Hardware Assembly (Optional)
 For physical hardware deployment:
 
 ```bash
@@ -73,7 +111,7 @@ arecord -f cd -t wav -d 5 test.wav
 aplay test.wav
 ```
 
-### 4. Simulation (Gazebo)
+### 5. Simulation (Gazebo)
 ```bash
 # Launch simulation environment
 ros2 launch sim/launch/emu_gazebo.launch.py
@@ -94,7 +132,7 @@ mu-bot/
 │   ├── emu_vision/         # Computer vision and AI inference
 │   └── emu_audio/          # Audio processing and TTS
 ├── sim/                    # Gazebo simulation
-│   ├── worlds/             # Testing environments  
+│   ├── worlds/             # Testing environments
 │   ├── urdf/               # Robot model definitions
 │   └── launch/             # Simulation launch files
 ├── ai/                     # AI model pipeline
@@ -115,7 +153,7 @@ mu-bot/
 
 ### Core Computing Stack
 - **Raspberry Pi 5 (16GB)** - Main computer brain
-- **Hailo AI HAT+ (26 TOPS)** - AI acceleration for inference  
+- **Hailo AI HAT+ (26 TOPS)** - AI acceleration for inference
 - **Waveshare WM8960 Audio HAT** - Microphone input and speaker output
 - **PCA9685 16-Channel PWM HAT** - Servo motor control
 
@@ -124,7 +162,7 @@ mu-bot/
 - **Stewart Platform Eye Mounts** - 3-DOF eye movement per camera
 - **12cm Baseline** - Optimized for 1-10m depth perception
 
-### Mechanical Structure  
+### Mechanical Structure
 - **2020 Aluminum Extrusion** - Lightweight, strong bone structure
 - **3D Printed Joints** - Custom connectors and housings
 - **12x SG90 Servos** - Eye platforms (6) + neck control (6)
@@ -153,7 +191,7 @@ Example outputs:
 
 ### Energy Management
 - **Active Mode**: 30 FPS vision processing (~25W total power)
-- **Eco Mode**: 10 FPS processing (~15W total power)  
+- **Eco Mode**: 10 FPS processing (~15W total power)
 - **Standby Mode**: 2 FPS monitoring (~8W total power)
 
 ## 🧠 AI Pipeline
@@ -171,7 +209,7 @@ hailortcli benchmark --model ../models/yolov8n.hef
 ### Custom Model Training
 ```bash
 # Train activity classifier
-cd ai/pytorch  
+cd ai/pytorch
 python3 train_custom_models.py --model activity_classifier --dataset /path/to/data
 
 # Export to ONNX for Hailo compilation
@@ -194,7 +232,7 @@ ros2 launch emu_vision emu_vision_launch.py
 # Monitor human detection
 ros2 topic echo /emu/report
 
-# Control head movement  
+# Control head movement
 ros2 topic pub /emu/head_cmd geometry_msgs/Twist '{angular: {z: 0.5}}'
 
 # Emergency stop
@@ -245,7 +283,7 @@ The repository includes pre-configured VSCode settings for optimal development:
 
 ```bash
 # Open in VSCode with ROS extensions
-code . 
+code .
 
 # Extensions automatically suggested:
 # - ROS 2 Extension Pack
@@ -315,6 +353,72 @@ python3 tests/validate_human_detection.py
 python3 tests/validate_pose_estimation.py
 ```
 
+## 🔧 Troubleshooting
+
+### Common Installation Issues
+
+#### "Could not find a version that satisfies the requirement rclpy"
+**Problem**: Trying to install ROS 2 packages via pip
+**Solution**: ROS 2 packages are installed via `apt`, not `pip`
+```bash
+# Install ROS 2 first
+sudo apt install ros-humble-desktop
+source /opt/ros/humble/setup.bash
+
+# Then install Python packages
+pip install -r requirements.txt
+```
+
+#### "Package 'emu_vision' not found"
+**Problem**: ROS workspace not built or sourced
+**Solution**: Build and source the workspace
+```bash
+colcon build --symlink-install
+source install/setup.bash
+```
+
+#### Camera not detected
+**Problem**: Camera drivers or permissions
+**Solution**: Check camera connections and permissions
+```bash
+# Test cameras
+libcamera-hello --list-cameras
+sudo usermod -a -G video $USER  # Add user to video group
+# Logout and login again
+```
+
+#### Hailo AI HAT+ not detected
+**Problem**: HAI drivers not installed
+**Solution**: Install Hailo drivers (requires Hailo Developer Zone access)
+```bash
+# Download from Hailo Developer Zone
+# Install HailoRT package
+sudo dpkg -i hailort-*.deb
+hailortcli scan
+```
+
+#### Permission denied on GPIO/I2C
+**Problem**: User not in required groups
+**Solution**: Add user to hardware access groups
+```bash
+sudo usermod -a -G gpio,i2c,spi $USER
+# Logout and login again
+```
+
+### Performance Issues
+
+#### High CPU usage
+- Reduce camera resolution in config files
+- Adjust detection frequency
+- Use Hailo AI acceleration
+
+#### Memory errors
+- Increase swap space
+- Reduce batch sizes
+- Monitor with `htop`
+
+For more help, see `ros2_dependencies.md` or open an issue on GitHub.
+
 ## 🤝 Contributing
 
 We welcome contributions to the Emu Droid project! Here's how to get involved:
@@ -359,7 +463,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Open Source Philosophy
 The Emu Droid project is committed to open-source principles:
 - **🔓 Open Hardware**: All schematics, 3D models, and assembly instructions
-- **💻 Open Software**: Complete source code, ROS packages, and AI models  
+- **💻 Open Software**: Complete source code, ROS packages, and AI models
 - **📖 Open Documentation**: Build guides, tutorials, and educational materials
 - **🤝 Open Community**: Welcoming contributions, collaboration, and forking
 
@@ -381,7 +485,7 @@ The Emu Droid project is committed to open-source principles:
 
 Special thanks to:
 - **Hailo Technologies** for AI acceleration innovation
-- **Raspberry Pi Foundation** for accessible computing platforms  
+- **Raspberry Pi Foundation** for accessible computing platforms
 - **ROS Community** for robotics software infrastructure
 - **Maker Movement** for open-source hardware inspiration
 - **Mare Island Maker Faire** for providing demonstration platform
