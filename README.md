@@ -42,7 +42,11 @@ The Emu Droid is an open-source bipedal companion robot designed to demonstrate 
 sudo apt install ros-humble-desktop
 ```
 
-#### Manual Installation (Alternative)
+**✅ If the quick script worked, skip to "Continue with Additional ROS 2 Packages" below.**
+
+---
+
+#### Manual Installation (Only if quick script failed)
 ```bash
 # Install ROS 2 Humble (Ubuntu 22.04) - GPG Key Fix Included
 sudo apt update && sudo apt install curl gnupg lsb-release
@@ -71,8 +75,12 @@ sudo apt update
 
 # Install ROS 2 Humble desktop
 sudo apt install ros-humble-desktop
+```
 
-# Install additional ROS 2 packages
+---
+
+#### Continue with Additional ROS 2 Packages (All users)
+```bash Install additional ROS 2 packages
 sudo apt install \
     ros-humble-gazebo-ros-pkgs \
     ros-humble-robot-state-publisher \
