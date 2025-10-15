@@ -409,6 +409,18 @@ source /opt/ros/humble/setup.bash
 pip install -r requirements.txt
 ```
 
+#### "Could not find a version that satisfies the requirement speech-recognition"
+**Problem**: Incorrect package name in requirements.txt
+**Solution**: Use correct package name `SpeechRecognition`
+```bash
+# If you see this error, the requirements.txt has been updated
+# Simply run pip install again:
+pip install -r requirements.txt
+
+# Or install manually:
+pip install SpeechRecognition>=3.10.0
+```
+
 #### "GPG error: NO_PUBKEY F42ED6FBAB17C654" or "repository is not signed"
 **Problem**: ROS 2 GPG key verification failure
 **Solution**: Use our automated fix script or manual steps
