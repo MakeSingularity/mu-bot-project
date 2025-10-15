@@ -67,6 +67,15 @@ sudo apt install \
     ros-humble-audio-msgs \
     ros-humble-control-msgs \
     ros-humble-trajectory-msgs
+
+# System dependencies for Python packages
+sudo apt install \
+    portaudio19-dev \
+    python3-dev \
+    build-essential \
+    libasound2-dev \
+    libffi-dev \
+    libssl-dev
 ```
 
 ## Development Tools

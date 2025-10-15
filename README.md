@@ -31,7 +31,12 @@ The Emu Droid is an open-source bipedal companion robot designed to demonstrate 
 
 ### 1. ROS 2 Installation (Required First!)
 
-**⚠️ IMPORTANT: Install ROS 2 Humble BEFORE running pip install!**
+**⚠️ IMPORTANT: Install ROS 2 Humble AND system dependencies BEFORE running pip install!**
+
+**📦 Key System Dependencies Needed:**
+- ROS 2 Humble desktop
+- Audio development libraries (portaudio19-dev, libasound2-dev)
+- Python development tools (python3-dev, build-essential)
 
 #### Quick Fix Script (Recommended)
 ```bash
@@ -80,7 +85,8 @@ sudo apt install ros-humble-desktop
 ---
 
 #### Continue with Additional ROS 2 Packages (All users)
-```bash Install additional ROS 2 packages
+```bash
+# Install additional ROS 2 packages
 sudo apt install \
     ros-humble-gazebo-ros-pkgs \
     ros-humble-robot-state-publisher \
@@ -88,6 +94,16 @@ sudo apt install \
     ros-humble-xacro \
     python3-colcon-common-extensions \
     python3-rosdep
+
+# Install system dependencies for Python packages (prevents PyAudio compilation errors)
+sudo apt install \
+    portaudio19-dev \
+    python3-dev \
+    build-essential \
+    libasound2-dev \
+    libffi-dev \
+    libssl-dev \
+    pkg-config
 
 # Initialize rosdep
 sudo rosdep init
@@ -107,6 +123,17 @@ cd mu-bot-project
 # Set up Python virtual environment
 python3 -m venv venv
 source venv/bin/activate
+
+# Install system dependencies for Python packages (IMPORTANT!)
+# These prevent PyAudio, librosa, and other audio package compilation errors
+sudo apt install \
+    portaudio19-dev \
+    python3-dev \
+    build-essential \
+    libasound2-dev \
+    libffi-dev \
+    libssl-dev \
+    pkg-config
 
 # Install Python dependencies (ROS 2 packages excluded)
 pip install -r requirements.txt
@@ -419,6 +446,28 @@ pip install -r requirements.txt
 
 # Or install manually:
 pip install SpeechRecognition>=3.10.0
+```
+
+#### "Building wheel for pyaudio did not run successfully"
+**Problem**: Missing system audio development libraries
+**Solution**: System dependencies should be installed during main setup, but if you skipped them:
+```bash
+# Install system dependencies (now included in main installation steps)
+sudo apt install \
+    portaudio19-dev \
+    python3-dev \
+    build-essential \
+    libasound2-dev \
+    libffi-dev \
+    libssl-dev \
+    pkg-config
+
+# Try pip install again
+pip install -r requirements.txt
+
+# Alternative: Install PyAudio from system packages (if above fails)
+sudo apt install python3-pyaudio
+# Then remove pyaudio from requirements.txt and install the rest
 ```
 
 #### "GPG error: NO_PUBKEY F42ED6FBAB17C654" or "repository is not signed"
