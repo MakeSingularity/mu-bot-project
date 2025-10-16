@@ -23,35 +23,314 @@ The Emu Droid is an open-source bipedal companion robot designed to demonstrate 
 
 ## 🚀 Quick Start
 
-### Prerequisites
+## 🖥️ Multi-Environment Setup
+
+The Emu Droid project is designed as a **distributed robotics system** with three types of environments that work together:
+
+### 🎯 Environment Types
+
+| Environment | Purpose | Hardware | Use Case |
+|------------|---------|----------|----------|
+| **🖥️ Desktop** | Primary development station | Powerful desktop/workstation | ROS development, simulation, AI training |
+| **💻 Laptop** | Portable development | Standard laptop | Field programming, remote debugging |
+| **🤖 Droid (RPi5)** | Robot hardware | Raspberry Pi 5 + HATs | Deployed robot with sensors/actuators |
+
+### 🌐 How They Work Together
+
+```
+Desktop (ROS Master) ←→ Laptop (Remote Dev) ←→ Droid (Hardware)
+     ↑                      ↑                     ↑
+  Simulation           Field Testing         Real Robot
+  AI Training         Remote Control        Human Tracking
+  Development         Debugging             Audio Reports
+```
+
+---
+
+## 🚀 Installation by Environment
+
+Choose your installation path based on your current system:
+
+### 📋 Prerequisites (All Environments)
 - Ubuntu 22.04 LTS (native or WSL2)
 - ROS 2 Humble Hawksbill
 - Python 3.10 or higher
 - Git and basic development tools
 
+---
+
+## 🖥️ Desktop Development Station Setup
+
+**Use this for:** Primary development, simulation, AI model training
+
 ### 1. ROS 2 Installation (Required First!)
 
 **⚠️ IMPORTANT: Install ROS 2 Humble AND system dependencies BEFORE running pip install!**
 
-**📦 Key System Dependencies Needed:**
-- ROS 2 Humble desktop
-- Audio development libraries (portaudio19-dev, libasound2-dev)
-- Python development tools (python3-dev, build-essential)
-
-#### Quick Fix Script (Recommended)
+#### 🔧 Quick ROS 2 Installation
 ```bash
 # Run our automated GPG keyring fix script
 ./scripts/fix_ros_keyring.sh
 
-# Then install ROS 2
+# Install ROS 2 Humble desktop (full stack)
 sudo apt install ros-humble-desktop
+
+# Install additional ROS 2 packages for development
+sudo apt install \
+    ros-humble-gazebo-ros-pkgs \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher \
+    ros-humble-xacro \
+    python3-colcon-common-extensions \
+    python3-rosdep
+
+# Initialize rosdep
+sudo rosdep init
+rosdep update
+
+# Source ROS 2 (add to ~/.bashrc for permanent setup)
+source /opt/ros/humble/setup.bash
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 ```
 
-**✅ If the quick script worked, skip to "Continue with Additional ROS 2 Packages" below.**
+#### 🐍 Python Environment Setup
+```bash
+# Clone the repository
+git clone https://github.com/makesingularity/mu-bot-project.git
+cd mu-bot-project
+
+# Set up Python virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install system dependencies for Python packages
+sudo apt install \
+    portaudio19-dev \
+    python3-dev \
+    build-essential \
+    libasound2-dev \
+    libffi-dev \
+    libssl-dev \
+    pkg-config
+
+# Install development dependencies (no hardware packages)
+pip install -r requirements-dev.txt
+```
+
+#### 🏗️ Build ROS Workspace
+```bash
+# Source ROS 2 and build workspace
+source /opt/ros/humble/setup.bash
+rosdep install --from-paths src --ignore-src -r -y
+colcon build --symlink-install
+source install/setup.bash
+echo "source $(pwd)/install/setup.bash" >> ~/.bashrc
+```
 
 ---
 
-#### Manual Installation (Only if quick script failed)
+## 💻 Laptop Development Setup
+
+**Use this for:** Portable development, field testing, remote debugging
+
+### Installation (Same as Desktop)
+Follow the **Desktop Development Station Setup** above - the requirements are identical for development environments.
+
+### 🌐 Network Configuration for Remote Development
+```bash
+# Configure ROS 2 networking to connect to desktop or droid
+export ROS_DOMAIN_ID=42  # Use same ID across all systems
+export ROS_DISCOVERY_SERVER=<desktop_ip>:11811  # Optional: centralized discovery
+
+# Add to ~/.bashrc for persistence
+echo "export ROS_DOMAIN_ID=42" >> ~/.bashrc
+```
+
+---
+
+## 🤖 Droid (Raspberry Pi 5) Setup
+
+**Use this for:** Deployed robot hardware with sensors and actuators
+
+### 🔧 Hardware Prerequisites
+- Raspberry Pi 5 (16GB recommended)
+- Hailo AI HAT+ (26 TOPS)
+- WM8960 Audio HAT
+- PCA9685 PWM HAT (servo control)
+- Arducam 5MP stereo cameras
+- MicroSD card (64GB+, Class 10)
+
+### 💾 Raspberry Pi OS Setup
+```bash
+# Flash Raspberry Pi OS (64-bit) to SD card
+# Enable SSH and configure WiFi during flash
+
+# SSH into Pi (replace with your Pi's IP)
+ssh pi@<raspberry_pi_ip>
+
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Enable I2C, SPI, Camera interfaces
+sudo raspi-config
+# Interface Options -> Enable I2C, SPI, Camera
+```
+
+### 🔧 ROS 2 Installation on Pi
+```bash
+# Run our automated GPG keyring fix script
+./scripts/fix_ros_keyring.sh
+
+# Install ROS 2 Humble (lightweight for Pi)
+sudo apt install ros-humble-ros-base  # Smaller footprint than desktop
+
+# Install hardware-specific ROS packages
+sudo apt install \
+    ros-humble-camera-info-manager \
+    ros-humble-image-transport \
+    ros-humble-vision-msgs \
+    python3-colcon-common-extensions \
+    python3-rosdep
+
+# Initialize rosdep
+sudo rosdep init
+rosdep update
+
+# Source ROS 2
+source /opt/ros/humble/setup.bash
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+```
+
+### 🐍 Python Environment (Pi Hardware)
+```bash
+# Clone repository
+git clone https://github.com/makesingularity/mu-bot-project.git
+cd mu-bot-project
+
+# Python virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install hardware dependencies for Pi
+sudo apt install \
+    portaudio19-dev \
+    python3-dev \
+    build-essential \
+    libasound2-dev \
+    libffi-dev \
+    libssl-dev \
+    pkg-config \
+    i2c-tools \
+    gpio
+
+# Install Pi-specific Python packages (includes hardware libraries)
+pip install -r requirements-pi.txt
+```
+
+### 🌐 Network Configuration for Droid
+```bash
+# Configure ROS 2 networking
+export ROS_DOMAIN_ID=42  # Match other systems
+export RMW_IMPLEMENTATION=rmw_cyclonedx_cpp  # Efficient for Pi
+
+# Configure as edge node (optional)
+export ROS_DISCOVERY_SERVER=<desktop_ip>:11811
+
+# Add to ~/.bashrc
+echo "export ROS_DOMAIN_ID=42" >> ~/.bashrc
+echo "export RMW_IMPLEMENTATION=rmw_cyclonedx_cpp" >> ~/.bashrc
+```
+
+### ⚡ Build Workspace (Pi Optimized)
+```bash
+# Build with limited parallel jobs (Pi memory constraint)
+source /opt/ros/humble/setup.bash
+rosdep install --from-paths src --ignore-src -r -y
+colcon build --symlink-install --parallel-workers 2
+source install/setup.bash
+echo "source $(pwd)/install/setup.bash" >> ~/.bashrc
+```
+
+---
+
+## 🌐 Multi-Environment Network Setup
+
+### 🎯 ROS 2 Domain Configuration
+
+All systems should use the same domain ID for communication:
+
+```bash
+# Add to ~/.bashrc on ALL systems (Desktop, Laptop, Droid)
+export ROS_DOMAIN_ID=42
+```
+
+### 🖥️ Desktop as ROS Master (Optional)
+```bash
+# On Desktop - set up discovery server
+ros2 daemon stop
+ros2 daemon start --ros-args -p discovery_server:=<desktop_ip>:11811
+
+# On other systems, point to desktop
+export ROS_DISCOVERY_SERVER=<desktop_ip>:11811
+```
+
+### 🔗 Testing Multi-Environment Communication
+```bash
+# On Desktop - publish test message
+ros2 topic pub /test_topic std_msgs/String "data: Hello from Desktop"
+
+# On Laptop - listen for message
+ros2 topic echo /test_topic
+
+# On Droid - check nodes are visible
+ros2 node list
+```
+
+---
+
+## 🚀 Quick Start by Environment
+
+### 🖥️ Desktop: Start Simulation
+```bash
+source install/setup.bash
+
+# Launch Gazebo simulation
+ros2 launch sim/launch/emu_gazebo.launch.py
+
+# Start vision processing (simulated)
+ros2 launch emu_vision emu_vision_launch.py simulation:=true
+```
+
+### 💻 Laptop: Remote Development
+```bash
+source install/setup.bash
+
+# Connect to droid and monitor
+ros2 topic list  # See available topics from droid
+ros2 topic echo /emu/report  # Listen to droid reports
+
+# Launch development tools
+code .  # Remote development with VSCode
+```
+
+### 🤖 Droid: Hardware Operation
+```bash
+source install/setup.bash
+
+# Test hardware
+python3 tests/field_tests.py
+
+# Start droid operation
+ros2 launch emu_vision emu_vision_launch.py hardware:=true
+
+# Monitor system
+htop  # Watch CPU/memory usage
+```
+
+---
+
+## 📁 Repository Structure
+```
 ```bash
 # Install ROS 2 Humble (Ubuntu 22.04) - GPG Key Fix Included
 sudo apt update && sudo apt install curl gnupg lsb-release
@@ -135,8 +414,16 @@ sudo apt install \
     libssl-dev \
     pkg-config
 
-# Install Python dependencies (ROS 2 packages excluded)
-pip install -r requirements.txt
+# Install Python dependencies - Choose your environment:
+
+# For DEVELOPMENT (laptops/desktops without hardware):
+pip install -r requirements-dev.txt
+
+# For DEPLOYMENT (Raspberry Pi with hardware):
+pip install -r requirements-pi.txt
+
+# Legacy (may fail on laptops due to hardware packages):
+# pip install -r requirements.txt
 ```
 
 ### 3. ROS 2 Workspace Setup
@@ -192,28 +479,35 @@ ros2 topic echo /emu/report
 
 ```
 mu-bot/
-├── src/                    # ROS 2 packages
-│   ├── emu_control/        # Motor control and gait planning
-│   ├── emu_vision/         # Computer vision and AI inference
-│   └── emu_audio/          # Audio processing and TTS
-├── sim/                    # Gazebo simulation
-│   ├── worlds/             # Testing environments
-│   ├── urdf/               # Robot model definitions
-│   └── launch/             # Simulation launch files
-├── scripts/                # Utility scripts
-│   └── fix_ros_keyring.sh  # GPG keyring fix script
-├── ai/                     # AI model pipeline
-│   ├── hailo/              # Hailo model compilation
-│   ├── pytorch/            # Custom model training
-│   └── models/             # Compiled model binaries
-├── hardware/               # Hardware documentation
-│   ├── wiring_guide.md     # Complete wiring instructions
-│   └── schematics.md       # Circuit diagrams and pinouts
-├── docs/                   # Project documentation
-│   ├── BOM.md              # Bill of materials with pricing
-│   └── timeline.md         # Development timeline to 2026
-├── tests/                  # Hardware and software tests
-└── .vscode/                # Development environment config
+├── src/                        # ROS 2 packages
+│   ├── emu_control/            # Motor control and gait planning
+│   ├── emu_vision/             # Computer vision and AI inference
+│   └── emu_audio/              # Audio processing and TTS
+├── sim/                        # Gazebo simulation
+│   ├── worlds/                 # Testing environments
+│   ├── urdf/                   # Robot model definitions
+│   └── launch/                 # Simulation launch files
+├── scripts/                    # Utility and setup scripts
+│   ├── fix_ros_keyring.sh      # GPG keyring fix script
+│   └── setup_desktop.sh        # Automated desktop setup
+├── ai/                         # AI model pipeline
+│   ├── hailo/                  # Hailo model compilation
+│   ├── pytorch/                # Custom model training
+│   └── models/                 # Compiled model binaries
+├── hardware/                   # Hardware documentation
+│   ├── wiring_guide.md         # Complete wiring instructions
+│   └── schematics.md           # Circuit diagrams and pinouts
+├── docs/                       # Project documentation
+│   ├── BOM.md                  # Bill of materials with pricing
+│   ├── timeline.md             # Development timeline to 2026
+│   ├── network_setup.md        # Multi-environment networking guide
+│   └── quick_start_by_environment.md  # Environment-specific setup
+├── tests/                      # Hardware and software tests
+├── .vscode/                    # Development environment config
+├── requirements.txt            # Python dependencies (environment selector)
+├── requirements-dev.txt        # Python deps for development (Desktop/Laptop)
+└── requirements-pi.txt         # Python deps for hardware (Raspberry Pi)
+```
 ```
 
 ## 🔧 Hardware Components
@@ -463,11 +757,26 @@ sudo apt install \
     pkg-config
 
 # Try pip install again
-pip install -r requirements.txt
+pip install -r requirements-pi.txt  # Use environment-specific file
 
 # Alternative: Install PyAudio from system packages (if above fails)
 sudo apt install python3-pyaudio
 # Then remove pyaudio from requirements.txt and install the rest
+```
+
+#### "mock-package.py does not exist" or hardware package installation errors
+**Problem**: Trying to install Raspberry Pi hardware packages on laptop/desktop
+**Solution**: Use the correct requirements file for your environment
+```bash
+# For development on laptops/desktops:
+pip install -r requirements-dev.txt
+
+# For deployment on Raspberry Pi:
+pip install -r requirements-pi.txt
+
+# If you already tried the main requirements.txt and failed:
+pip uninstall RPi.GPIO adafruit-circuitpython-pca9685 adafruit-circuitpython-motor adafruit-circuitpython-servokit gpiozero pigpio
+pip install -r requirements-dev.txt
 ```
 
 #### "GPG error: NO_PUBKEY F42ED6FBAB17C654" or "repository is not signed"

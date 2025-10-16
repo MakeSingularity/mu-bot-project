@@ -1,20 +1,9 @@
-# Emu Droid Project Requirements - Environment Selection
-# Python dependencies for the emu droid companion robot project
+# Emu Droid Project Requirements - Raspberry Pi Hardware Version
+# Python dependencies for deployment on Raspberry Pi with hardware
 #
-# IMPORTANT: Choose the right requirements file for your environment:
+# For development on laptops, use requirements-dev.txt instead
 #
-# For DEVELOPMENT on laptops/desktops (no hardware):
-#   pip install -r requirements-dev.txt
-#
-# For DEPLOYMENT on Raspberry Pi (with hardware):
-#   pip install -r requirements-pi.txt
-#
-# This main file is kept for backward compatibility but may cause
-# hardware package installation errors on non-Pi systems.
-#
-# NOTE: ROS 2 packages (rclpy, sensor_msgs, etc.) are NOT installed via pip!
-# Install ROS 2 Humble first: https://docs.ros.org/en/humble/Installation.html
-# Then source the setup: source /opt/ros/humble/setup.bash
+# This file includes all hardware-specific packages
 
 # Computer Vision and Image Processing
 opencv-python>=4.8.0
@@ -34,13 +23,17 @@ onnxruntime>=1.15.0
 # hailo-platform>=4.17.0
 # hailo-sdk-client>=4.17.0
 
-# Hardware Interfaces
+# Hardware Interfaces (Raspberry Pi specific)
 pyserial>=3.5
 smbus2>=0.4.0
 RPi.GPIO>=0.7.1
 adafruit-circuitpython-pca9685>=3.4.0
 adafruit-circuitpython-motor>=3.4.0
 adafruit-circuitpython-servokit>=1.3.0
+
+# Hardware Specific (Raspberry Pi)
+gpiozero>=1.6.2
+pigpio>=1.78
 
 # Audio Processing
 # NOTE: PyAudio requires system audio libraries (see README troubleshooting)
@@ -73,13 +66,6 @@ flake8>=6.0.0
 mypy>=1.0.0
 pre-commit>=3.0.0
 
-# Simulation and Visualization (ROS 2 packages - install via apt)
-# gazebo-msgs         # sudo apt install ros-humble-gazebo-msgs
-# robot-state-publisher  # sudo apt install ros-humble-robot-state-publisher
-# joint-state-publisher   # sudo apt install ros-humble-joint-state-publisher
-# xacro               # sudo apt install ros-humble-xacro
-# urdf-parser-py      # sudo apt install ros-humble-urdf-parser-py
-
 # Mathematical Libraries
 sympy>=1.11.0
 transforms3d>=0.4.1
@@ -88,10 +74,6 @@ transforms3d>=0.4.1
 paho-mqtt>=1.6.0
 websockets>=11.0.0
 aiohttp>=3.8.0
-
-# Hardware Specific (Raspberry Pi)
-gpiozero>=1.6.2
-pigpio>=1.78
 
 # Documentation
 sphinx>=5.3.0
