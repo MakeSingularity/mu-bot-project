@@ -54,7 +54,7 @@ sudo apt install -y \
     software-properties-common
 
 # Fix ROS keyring and install
-./scripts/fix_ros_keyring.sh
+$(dirname "$0")/fix_ros_keyring.sh
 
 echo "Installing ROS 2 Humble (Pi-optimized)..."
 # Install ROS base (lighter than desktop for Pi)
@@ -222,7 +222,7 @@ echo "Using $BUILD_JOBS parallel build jobs (detected $CORES cores)"
 # Set memory limits for compilation
 export MAKEFLAGS="-j$BUILD_JOBS"
 
-colcon build --symlink-install --parallel-workers $BUILD_JOBS
+colcon build --symlink-install --parallel-workers $BUILD_JOBS --packages-ignore-regex ".*venv.*|.*test.*|.*mock.*"
 
 # Source workspace
 source install/setup.bash
