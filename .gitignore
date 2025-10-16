@@ -17,17 +17,25 @@ log/
 *.bag
 *.db3
 
-# Python
+# Python Virtual Environments - Comprehensive Coverage
+venv/
+.venv/
+.venv.bak/
+env/
+.env
+ENV/
+env.bak/
+.python-version
+
+# Python Build Artifacts
+*.egg-info/
+dist/
+build/
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 pip-log.txt
 pip-delete-this-directory.txt
 
