@@ -1,0 +1,306 @@
+#!/bin/bash
+# Laptop Development Environment Setup Script
+# Automated setup for portable development with power optimizations
+
+set -e  # Exit on any error
+
+echo "💻 Emu Droid Laptop Development Environment Setup"
+echo "==============================================="
+echo ""
+
+# Check if running on Ubuntu 22.04
+if ! grep -q "jammy" /etc/os-release; then
+    echo "⚠️  Warning: This script is designed for Ubuntu 22.04 (Jammy)"
+    echo "Your system may be different. Continue? (y/N)"
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        echo "Exiting..."
+        exit 1
+    fi
+fi
+
+echo "📦 Step 1: Installing ROS 2 Humble..."
+# Fix ROS keyring and install
+./scripts/fix_ros_keyring.sh
+
+echo "Installing ROS 2 desktop packages..."
+sudo apt install -y \
+    ros-humble-desktop \
+    ros-humble-gazebo-ros-pkgs \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher \
+    ros-humble-xacro \
+    python3-colcon-common-extensions \
+    python3-rosdep
+
+# Initialize rosdep
+if [ ! -d /etc/ros/rosdep ]; then
+    sudo rosdep init
+fi
+rosdep update
+
+echo ""
+echo "🔧 Step 2: Installing system dependencies..."
+sudo apt install -y \
+    portaudio19-dev \
+    python3-dev \
+    build-essential \
+    libasound2-dev \
+    libffi-dev \
+    libssl-dev \
+    pkg-config \
+    git \
+    curl \
+    vim \
+    htop \
+    tree \
+    powertop \
+    tlp \
+    tlp-rdw
+
+echo ""
+echo "⚡ Step 3: Configuring power management for laptops..."
+# Enable TLP for better battery life during development
+sudo systemctl enable tlp
+sudo systemctl start tlp
+
+# Configure power-saving settings
+echo "Configuring laptop-specific power optimizations..."
+sudo tee /etc/tlp.d/99-emu-droid-laptop.conf > /dev/null << EOF
+# Emu Droid Laptop Power Optimization
+# Optimized for development work with good battery life
+
+# CPU frequency scaling
+CPU_SCALING_GOVERNOR_ON_AC=performance
+CPU_SCALING_GOVERNOR_ON_BAT=powersave
+CPU_ENERGY_PERF_POLICY_ON_AC=performance
+CPU_ENERGY_PERF_POLICY_ON_BAT=power
+
+# Disable turbo boost on battery for better thermal management
+CPU_BOOST_ON_AC=1
+CPU_BOOST_ON_BAT=0
+
+# Reduce CPU max frequency on battery
+CPU_SCALING_MAX_FREQ_ON_AC=0
+CPU_SCALING_MAX_FREQ_ON_BAT=2000000
+
+# GPU power management
+RADEON_POWER_PROFILE_ON_AC=high
+RADEON_POWER_PROFILE_ON_BAT=low
+
+# WiFi power saving
+WIFI_PWR_ON_AC=off
+WIFI_PWR_ON_BAT=on
+
+# USB power management
+USB_AUTOSUSPEND=1
+USB_BLACKLIST_PHONE=1
+
+# Enable laptop mode for disk I/O
+DISK_APM_LEVEL_ON_AC="254 254"
+DISK_APM_LEVEL_ON_BAT="128 128"
+EOF
+
+echo ""
+echo "🐍 Step 4: Setting up Python environment..."
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+    echo "Created Python virtual environment"
+else
+    echo "Python virtual environment already exists"
+fi
+
+# Activate virtual environment
+source venv/bin/activate
+
+echo "Installing Python development dependencies..."
+pip install --upgrade pip setuptools wheel
+pip install -r requirements-dev.txt
+
+echo ""
+echo "🏗️  Step 5: Building ROS workspace..."
+# Source ROS 2
+source /opt/ros/humble/setup.bash
+
+# Install workspace dependencies
+rosdep install --from-paths src --ignore-src -r -y
+
+# Build workspace with limited parallel jobs for laptops
+echo "Building ROS packages (laptop-optimized)..."
+# Detect CPU cores and use 75% for build (leaves some for system)
+CORES=$(nproc)
+BUILD_JOBS=$((CORES * 3 / 4))
+if [ $BUILD_JOBS -lt 1 ]; then
+    BUILD_JOBS=1
+fi
+echo "Using $BUILD_JOBS parallel build jobs (detected $CORES cores)"
+
+colcon build --symlink-install --parallel-workers $BUILD_JOBS
+
+# Source workspace
+source install/setup.bash
+
+echo ""
+echo "⚙️  Step 6: Configuring environment..."
+
+# Add ROS sourcing to bashrc if not already present
+if ! grep -q "source /opt/ros/humble/setup.bash" ~/.bashrc; then
+    echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+    echo "Added ROS 2 sourcing to ~/.bashrc"
+fi
+
+# Add workspace sourcing to bashrc
+WORKSPACE_SOURCE="source $(pwd)/install/setup.bash"
+if ! grep -q "$WORKSPACE_SOURCE" ~/.bashrc; then
+    echo "$WORKSPACE_SOURCE" >> ~/.bashrc
+    echo "Added workspace sourcing to ~/.bashrc"
+fi
+
+# Add ROS domain ID
+if ! grep -q "export ROS_DOMAIN_ID=42" ~/.bashrc; then
+    echo "export ROS_DOMAIN_ID=42" >> ~/.bashrc
+    echo "Added ROS_DOMAIN_ID to ~/.bashrc"
+fi
+
+# Add laptop-specific environment variables
+if ! grep -q "export EMU_ENVIRONMENT=laptop" ~/.bashrc; then
+    echo "export EMU_ENVIRONMENT=laptop" >> ~/.bashrc
+    echo "Added environment identifier to ~/.bashrc"
+fi
+
+echo ""
+echo "🌐 Step 7: Configuring networking for remote development..."
+
+# Create network configuration helper
+cat > ~/emu_network_config.sh << 'EOF'
+#!/bin/bash
+# Emu Droid Laptop Network Configuration Helper
+# Use this to connect to desktop or droid for remote development
+
+echo "🌐 Emu Droid Network Configuration"
+echo "Select your target environment:"
+echo "1) Desktop development station"
+echo "2) Raspberry Pi droid"
+echo "3) Standalone laptop mode"
+echo "4) Show current configuration"
+
+read -p "Enter choice (1-4): " choice
+
+case $choice in
+    1)
+        read -p "Enter desktop IP address: " desktop_ip
+        echo "export ROS_DISCOVERY_SERVER=$desktop_ip:11811" >> ~/.bashrc
+        echo "✅ Configured to connect to desktop at $desktop_ip"
+        echo "Restart terminal or run: source ~/.bashrc"
+        ;;
+    2)
+        read -p "Enter Raspberry Pi IP address: " pi_ip
+        echo "export ROS_DISCOVERY_SERVER=$pi_ip:11811" >> ~/.bashrc
+        echo "✅ Configured to connect to Pi at $pi_ip"
+        echo "Restart terminal or run: source ~/.bashrc"
+        ;;
+    3)
+        # Remove discovery server setting
+        sed -i '/ROS_DISCOVERY_SERVER/d' ~/.bashrc
+        echo "✅ Configured for standalone mode"
+        echo "Restart terminal or run: source ~/.bashrc"
+        ;;
+    4)
+        echo "Current configuration:"
+        echo "  ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-not set}"
+        echo "  ROS_DISCOVERY_SERVER: ${ROS_DISCOVERY_SERVER:-not set}"
+        echo "  EMU_ENVIRONMENT: ${EMU_ENVIRONMENT:-not set}"
+        ;;
+    *)
+        echo "Invalid choice"
+        ;;
+esac
+EOF
+
+chmod +x ~/emu_network_config.sh
+echo "Created network configuration helper: ~/emu_network_config.sh"
+
+echo ""
+echo "🧪 Step 8: Running basic tests..."
+
+# Test ROS 2 installation
+echo "Testing ROS 2 installation..."
+if ros2 --help > /dev/null 2>&1; then
+    echo "✅ ROS 2 command line tools working"
+else
+    echo "❌ ROS 2 command line tools not working"
+    exit 1
+fi
+
+# Test workspace build
+echo "Testing workspace build..."
+if [ -f "install/setup.bash" ]; then
+    echo "✅ Workspace built successfully"
+else
+    echo "❌ Workspace build failed"
+    exit 1
+fi
+
+# Test Python environment
+echo "Testing Python environment..."
+if python3 -c "import cv2, numpy, torch" > /dev/null 2>&1; then
+    echo "✅ Core Python packages installed"
+else
+    echo "❌ Some Python packages missing"
+fi
+
+# Test power management
+echo "Testing power management..."
+if systemctl is-enabled tlp > /dev/null 2>&1; then
+    echo "✅ Power management configured"
+else
+    echo "⚠️  Power management not fully configured"
+fi
+
+echo ""
+echo "🎉 Laptop Development Environment Setup Complete!"
+echo ""
+echo "💻 Laptop-Specific Features:"
+echo "✅ Power management optimized for battery life"
+echo "✅ Parallel build jobs optimized for laptop CPUs"
+echo "✅ Network configuration helper for remote development"
+echo ""
+echo "📋 Next Steps:"
+echo "1. Open a new terminal (to load environment variables)"
+echo "2. Configure network connection:"
+echo "   ~/emu_network_config.sh"
+echo ""
+echo "3. Test local simulation:"
+echo "   cd $(pwd)"
+echo "   source venv/bin/activate"
+echo "   ros2 launch sim/launch/emu_gazebo.launch.py"
+echo ""
+echo "4. Connect to remote droid:"
+echo "   ros2 topic list  # Should show topics from remote system"
+echo "   ros2 topic echo /emu/report  # Listen to droid reports"
+echo ""
+echo "📱 Power Management:"
+echo "   - TLP configured for optimal battery usage"
+echo "   - CPU scaling: Performance on AC, PowerSave on battery"
+echo "   - Monitor with: sudo tlp-stat"
+echo ""
+echo "🌐 Remote Development:"
+echo "   - Use ~/emu_network_config.sh to switch between environments"
+echo "   - VSCode Remote-SSH for Pi development"
+echo "   - ROS tools work across network transparently"
+echo ""
+echo "📚 Documentation:"
+echo "   - README.md - Full installation guide"
+echo "   - docs/quick_start_by_environment.md - Environment guides"
+echo "   - docs/network_setup.md - Multi-environment networking"
+echo ""
+
+# Final environment check
+echo "Current environment status:"
+echo "  ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-not set}"
+echo "  Python virtual environment: $(which python3)"
+echo "  ROS 2 distro: ${ROS_DISTRO:-not sourced}"
+echo "  Power management: $(systemctl is-enabled tlp 2>/dev/null || echo 'not configured')"
+echo "  Build optimization: $BUILD_JOBS parallel jobs"
+echo ""
+echo "✨ Happy mobile developing! ✨"

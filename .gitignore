@@ -22,7 +22,7 @@ venv/
 .venv/
 .venv.bak/
 env/
-.env
+.env/
 ENV/
 env.bak/
 .python-version
@@ -39,6 +39,34 @@ __pycache__/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Environment-Specific Configuration Files
+config/local_*.yaml
+config/device_*.yaml
+config/*_local.yaml
+.env.local
+.env.*.local
+*_config_local.py
+
+# Device-Specific Caches and Generated Files
+cache/
+.cache/
+calibration_data/
+device_profiles/
+runtime_configs/
+local_settings/
+
+# Hardware-Specific Generated Files
+gpio_states.json
+i2c_device_map.json
+camera_calibration_*.yaml
+servo_positions.json
+audio_device_config.json
+
+# Network Configuration (may contain IPs/credentials)
+network_config_local.yaml
+discovery_peers.json
+ros_master_uri.txt
+
 # PyTorch / Machine Learning
 *.pth
 *.onnx
@@ -52,6 +80,8 @@ models/*.hef
 runs/
 logs/
 tensorboard_logs/
+training_outputs/
+model_cache/
 
 # 3D Printing / CAD Files (Large Binary Files)
 *.stl
@@ -82,6 +112,7 @@ gazebo/
 
 # IDE / Editor Files
 .vscode/settings.json.user
+.vscode/launch.json.user
 .idea/
 *.swp
 *.swo
@@ -111,12 +142,6 @@ coverage.xml
 *.temp
 *.pid
 *.lock
-.cache/
-
-# Environment Variables
-.env
-.env.local
-.env.*.local
 
 # Database Files
 *.db
@@ -136,13 +161,15 @@ coverage.xml
 *.rar
 *.7z
 
-# Hardware Test Data
+# Hardware Test Data and Recordings
 test_data/
-calibration_data/
+test_recordings/
 recording_*.wav
 recording_*.mp4
 captured_*.jpg
 captured_*.png
+sensor_logs/
+hardware_diagnostics/
 
 # AI Training Data (Large datasets)
 training_data/
@@ -173,12 +200,14 @@ scratch/
 experiments/
 deprecated/
 archive/
+personal_notes/
 
 # Sensitive Configuration
 config/secrets.yaml
 config/private.yaml
 hardware/private_keys/
 credentials.json
+api_keys.json
 
 # Large Media Files
 *.mp4
@@ -194,3 +223,26 @@ credentials.json
 output/
 results/
 reports/
+diagnostics/
+
+# Package Manager Files
+node_modules/
+package-lock.json
+yarn.lock
+
+# Platform-Specific Generated Files
+# Desktop Environment
+desktop_workspace.code-workspace
+local_simulation_params.yaml
+
+# Laptop Environment
+power_profiles/
+laptop_specific_configs/
+battery_optimization.json
+
+# Raspberry Pi Environment
+/boot/config.txt.backup
+/etc/dhcpcd.conf.backup
+raspi_hardware_state.json
+gpio_pin_assignments.json
+hat_detection_results.json
