@@ -256,8 +256,8 @@ if ! grep -q "export EMU_ENVIRONMENT=droid" ~/.bashrc; then
 fi
 
 # Configure RMW for Pi efficiency
-if ! grep -q "export RMW_IMPLEMENTATION=rmw_cyclonedx_cpp" ~/.bashrc; then
-    echo "export RMW_IMPLEMENTATION=rmw_cyclonedx_cpp" >> ~/.bashrc
+if ! grep -q "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" ~/.bashrc; then
+    echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc
     echo "Added efficient RMW implementation for Pi"
 fi
 

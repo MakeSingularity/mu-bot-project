@@ -1,0 +1,84 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    # List of controllers
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    left_leg_position_controller:
+      type: position_controllers/JointGroupPositionController
+
+    right_leg_position_controller:
+      type: position_controllers/JointGroupPositionController
+
+    neck_position_controller:
+      type: position_controllers/JointGroupPositionController
+
+    eye_position_controller:
+      type: position_controllers/JointGroupPositionController
+
+# Joint State Broadcaster Configuration
+joint_state_broadcaster:
+  ros__parameters:
+    joints:
+      - left_hip_joint
+      - left_knee_joint
+      - left_ankle_joint
+      - right_hip_joint
+      - right_knee_joint
+      - right_ankle_joint
+      - neck_base_joint
+      - head_joint
+      - left_eye_joint
+      - right_eye_joint
+
+# Left Leg Position Controller Configuration
+left_leg_position_controller:
+  ros__parameters:
+    joints:
+      - left_hip_joint
+      - left_knee_joint
+      - left_ankle_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+# Right Leg Position Controller Configuration
+right_leg_position_controller:
+  ros__parameters:
+    joints:
+      - right_hip_joint
+      - right_knee_joint
+      - right_ankle_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+# Neck Position Controller Configuration
+neck_position_controller:
+  ros__parameters:
+    joints:
+      - neck_base_joint
+      - head_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+# Eye Position Controller Configuration
+eye_position_controller:
+  ros__parameters:
+    joints:
+      - left_eye_joint
+      - right_eye_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity

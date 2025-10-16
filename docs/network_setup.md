@@ -111,8 +111,8 @@ ros2 daemon start
 
 ### Problem: High network latency
 ```bash
-# Use cyclone DDS with optimized settings
-export RMW_IMPLEMENTATION=rmw_cyclonedx_cpp
+# Use FastRTPS with optimized settings
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 
 # Create cyclone config file
 mkdir -p ~/.ros
@@ -216,7 +216,7 @@ export ROS_SECURITY_STRATEGY=Enforce
 ```bash
 # Core ROS 2 configuration
 export ROS_DOMAIN_ID=42
-export RMW_IMPLEMENTATION=rmw_cyclonedx_cpp
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DISCOVERY_SERVER=192.168.1.100:11811  # Optional
 
 # Performance tuning
