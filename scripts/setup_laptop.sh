@@ -186,6 +186,14 @@ if ! grep -q "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" ~/.bashrc; then
     echo "Added RMW_IMPLEMENTATION to ~/.bashrc"
 fi
 
+# Configure Git if not already configured
+if ! git config user.name > /dev/null 2>&1; then
+    echo "Configuring Git user settings..."
+    git config user.name "makesingularity"
+    git config user.email "dev@makesingularity.org"
+    echo "Git user configuration completed"
+fi
+
 echo ""
 echo "🌐 Step 7: Configuring networking for remote development..."
 
