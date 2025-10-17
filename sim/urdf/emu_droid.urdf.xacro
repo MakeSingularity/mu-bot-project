@@ -2,7 +2,7 @@
 <robot name="emu_droid" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Properties and Constants -->
-  <xacro:property name="pi" value="3.14159265359"/>
+  <xacro:property name="M_PI" value="3.14159265359"/>
   <xacro:property name="body_height" value="0.8"/>
   <xacro:property name="body_width" value="0.3"/>
   <xacro:property name="body_depth" value="0.25"/>
@@ -11,20 +11,20 @@
   <xacro:property name="neck_length" value="0.4"/>
   <xacro:property name="head_size" value="0.15"/>
   <xacro:property name="eye_baseline" value="0.12"/>
-  
+
   <!-- Material Definitions -->
   <material name="aluminum">
     <color rgba="0.8 0.8 0.9 1.0"/>
   </material>
-  
+
   <material name="black_plastic">
     <color rgba="0.1 0.1 0.1 1.0"/>
   </material>
-  
+
   <material name="camera_black">
     <color rgba="0.0 0.0 0.0 1.0"/>
   </material>
-  
+
   <material name="servo_blue">
     <color rgba="0.0 0.3 0.8 1.0"/>
   </material>
@@ -310,7 +310,7 @@
   </link>
 
   <!-- Joint Definitions -->
-  
+
   <!-- Hip Joints -->
   <joint name="left_hip_joint" type="revolute">
     <parent link="base_link"/>
@@ -508,7 +508,7 @@
     <hardware>
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
     </hardware>
-    
+
     <!-- Joint interfaces for leg control -->
     <joint name="left_hip_joint">
       <command_interface name="position">
@@ -518,7 +518,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <joint name="left_knee_joint">
       <command_interface name="position">
         <param name="min">-2.0</param>
@@ -527,7 +527,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <joint name="left_ankle_joint">
       <command_interface name="position">
         <param name="min">-0.5</param>
@@ -536,7 +536,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <joint name="right_hip_joint">
       <command_interface name="position">
         <param name="min">-1.57</param>
@@ -545,7 +545,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <joint name="right_knee_joint">
       <command_interface name="position">
         <param name="min">-2.0</param>
@@ -554,7 +554,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <joint name="right_ankle_joint">
       <command_interface name="position">
         <param name="min">-0.5</param>
@@ -563,27 +563,27 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <!-- Neck and head control -->
     <joint name="neck_base_joint">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <joint name="head_joint">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <!-- Eye platform control -->
     <joint name="left_eye_joint">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    
+
     <joint name="right_eye_joint">
       <command_interface name="position"/>
       <state_interface name="position"/>
@@ -593,7 +593,8 @@
 
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <parameters>$(find emu_droid_control)/config/emu_controllers.yaml</parameters>
+      <!-- TODO: Create emu_control package with controller config -->
+      <!-- <parameters>$(find emu_control)/config/emu_controllers.yaml</parameters> -->
     </plugin>
   </gazebo>
 

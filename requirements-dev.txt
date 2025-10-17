@@ -76,6 +76,9 @@ myst-parser>=0.18.0
 jupyter>=1.0.0
 ipykernel>=6.20.0
 
+# XML processing for Gazebo integration
+lxml>=4.8.0
+
 # Version constraints for stability
 setuptools>=65.0.0
 wheel>=0.38.0

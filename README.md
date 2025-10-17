@@ -49,6 +49,8 @@ Desktop (ROS Master) ←→ Laptop (Remote Dev) ←→ Droid (Hardware)
 
 **Prerequisites**: Ubuntu 22.04 LTS, Git, internet connection
 
+> **✨ New in v2.1**: Setup scripts now automatically handle all common issues including virtual environment conflicts, ROS 2 middleware configuration, and path resolution. Scripts work from any directory!
+
 ### 1️⃣ Clone Repository (All Environments)
 ```bash
 git clone https://github.com/makesingularity/mu-bot-project.git
@@ -71,6 +73,12 @@ cd mu-bot-project
 ```
 **Features**: Same as desktop + power management, network configuration helper, portable optimizations
 
+**Recent Improvements** (v2.1):
+- ✅ Fixed virtual environment conflicts with colcon build
+- ✅ Auto-configures RMW implementation for ROS 2 compatibility
+- ✅ Resolves path issues - runs from any directory
+- ✅ Creates proper symlinks for ROS 2 launch file compatibility
+
 #### 🤖 Raspberry Pi Droid Hardware
 ```bash
 # Automated setup with hardware interfaces and Pi optimizations
@@ -87,6 +95,13 @@ Each setup script automatically installs the correct Python dependencies:
 | **Desktop** | `requirements-dev.txt` | ❌ No hardware packages (laptops/desktops) |
 | **Laptop** | `requirements-dev.txt` | ❌ No hardware packages (portable development) |
 | **Droid** | `requirements-pi.txt` | ✅ Full hardware support (GPIO, I2C, sensors) |
+
+> **📋 Setup Script Notes**:
+> - Scripts can be run multiple times safely (idempotent)
+> - Work from any directory (absolute path resolution)
+> - Automatically handle virtual environment conflicts
+> - Set up proper ROS 2 middleware configuration
+> - Create all necessary symlinks for launch compatibility
 
 ---
 
@@ -108,12 +123,27 @@ ros2 topic echo /emu/report
 
 ### 💻 Laptop Testing
 ```bash
+# Test ROS 2 installation (should work after setup)
+ros2 --help
+
+# Test local emu vision nodes
+ros2 run emu_vision emu_observer
+ros2 run emu_vision emu_tracker
+ros2 run emu_vision emu_pose_estimator
+
+# Test launch file
+ros2 launch emu_vision emu_vision_launch.py
+
 # Test network configuration helper
 ~/emu_network_config.sh
 
-# Connect to remote droid
+# Connect to remote droid (when available)
 ros2 topic list  # Should show topics from remote system
 ros2 topic echo /emu/report  # Listen to droid reports
+
+# Build and test workspace
+colcon build --base-paths src --symlink-install
+source install/setup.bash
 ```
 
 ### 🤖 Droid Testing
@@ -278,15 +308,30 @@ source /opt/ros/humble/setup.bash
 # Install workspace-specific dependencies
 rosdep install --from-paths src --ignore-src -r -y
 
-# Build ROS packages
-colcon build --symlink-install
+# Build ROS packages (using improved command to avoid venv conflicts)
+colcon build --base-paths src --symlink-install
 
 # Source the workspace
 source install/setup.bash
 
-# Add workspace to auto-source (optional)
+# Configure ROS 2 middleware for compatibility
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+# Add to auto-source (optional)
 echo "source $(pwd)/install/setup.bash" >> ~/.bashrc
+echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc
+
+# Create symlinks for ROS 2 launch compatibility (automated in setup scripts)
+mkdir -p install/emu_vision/lib/emu_vision
+ln -sf ../../bin/emu_observer install/emu_vision/lib/emu_vision/
+ln -sf ../../bin/emu_tracker install/emu_vision/lib/emu_vision/
+ln -sf ../../bin/emu_pose_estimator install/emu_vision/lib/emu_vision/
+
+# Add COLCON_IGNORE to prevent venv scanning (automated in setup scripts)
+touch venv/COLCON_IGNORE
 ```
+
+> **💡 Note**: The automated setup scripts (`./scripts/setup_*.sh`) handle all these manual steps automatically, including the recent improvements for RMW configuration, virtual environment exclusion, and symlink creation.
 
 ### 4. Hardware Assembly (Optional)
 For physical hardware deployment:
@@ -659,6 +704,56 @@ sudo apt install ros-humble-desktop
 ```bash
 colcon build --symlink-install
 source install/setup.bash
+```
+
+### Setup Script Issues (Fixed in v2.1)
+
+#### "No such file or directory: ./scripts/fix_ros_keyring.sh"
+**Problem**: Setup script run from wrong directory or with relative paths
+**Solution**: Fixed in v2.1 - setup scripts now work from any directory
+```bash
+# Works from any location now:
+./scripts/setup_laptop.sh
+# or
+/full/path/to/mu-bot/scripts/setup_laptop.sh
+```
+
+#### "Failed to determine Python package name" or "mock-package.py does not exist"
+**Problem**: Colcon scanning virtual environment and finding JupyterLab test packages
+**Solution**: Fixed in v2.1 - virtual environment excluded from builds
+```bash
+# If you see this error with older setups:
+touch venv/COLCON_IGNORE  # Exclude venv from colcon scanning
+colcon build --base-paths src --symlink-install  # Build only src/ packages
+```
+
+#### "ROS 2 command line tools not working" or "librmw_cyclonedx_cpp.so: cannot open shared object file"
+**Problem**: Missing or incorrect RMW (ROS Middleware) implementation
+**Solution**: Fixed in v2.1 - automatically configured
+```bash
+# Manual fix if needed:
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc
+```
+
+#### "No executable found" when running ros2 run or ros2 launch
+**Problem**: Executables not in expected ROS 2 libexec directory
+**Solution**: Fixed in v2.1 - automatic symlink creation
+```bash
+# Manual fix if needed:
+mkdir -p install/emu_vision/lib/emu_vision
+ln -sf ../../bin/emu_observer install/emu_vision/lib/emu_vision/
+ln -sf ../../bin/emu_tracker install/emu_vision/lib/emu_vision/
+ln -sf ../../bin/emu_pose_estimator install/emu_vision/lib/emu_vision/
+```
+
+#### "ModuleNotFoundError: No module named 'Cython'"
+**Problem**: Missing Cython dependency for NumPy compilation
+**Solution**: Fixed in v2.1 - automatically installed
+```bash
+# Manual fix if needed:
+source venv/bin/activate
+pip install Cython
 ```
 
 #### Camera not detected

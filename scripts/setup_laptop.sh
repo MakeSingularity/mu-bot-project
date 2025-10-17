@@ -21,7 +21,8 @@ fi
 
 echo "📦 Step 1: Installing ROS 2 Humble..."
 # Fix ROS keyring and install
-./scripts/fix_ros_keyring.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/fix_ros_keyring.sh"
 
 echo "Installing ROS 2 desktop packages..."
 sudo apt install -y \
@@ -30,6 +31,8 @@ sudo apt install -y \
     ros-humble-robot-state-publisher \
     ros-humble-joint-state-publisher \
     ros-humble-xacro \
+    ros-humble-controller-manager \
+    ros-humble-gazebo-ros2-control \
     python3-colcon-common-extensions \
     python3-rosdep
 
@@ -135,7 +138,16 @@ if [ $BUILD_JOBS -lt 1 ]; then
 fi
 echo "Using $BUILD_JOBS parallel build jobs (detected $CORES cores)"
 
-colcon build --symlink-install --parallel-workers $BUILD_JOBS
+# Build only packages in src/ directory to avoid venv conflicts
+colcon build --base-paths src --symlink-install --parallel-workers $BUILD_JOBS
+
+# Create symlinks for ROS 2 launch compatibility
+if [ -d "install/emu_vision/bin" ]; then
+    mkdir -p install/emu_vision/lib/emu_vision
+    ln -sf ../../bin/emu_observer install/emu_vision/lib/emu_vision/ 2>/dev/null || true
+    ln -sf ../../bin/emu_tracker install/emu_vision/lib/emu_vision/ 2>/dev/null || true
+    ln -sf ../../bin/emu_pose_estimator install/emu_vision/lib/emu_vision/ 2>/dev/null || true
+fi
 
 # Source workspace
 source install/setup.bash
@@ -166,6 +178,12 @@ fi
 if ! grep -q "export EMU_ENVIRONMENT=laptop" ~/.bashrc; then
     echo "export EMU_ENVIRONMENT=laptop" >> ~/.bashrc
     echo "Added environment identifier to ~/.bashrc"
+fi
+
+# Add RMW implementation setting
+if ! grep -q "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" ~/.bashrc; then
+    echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc
+    echo "Added RMW_IMPLEMENTATION to ~/.bashrc"
 fi
 
 echo ""
@@ -225,6 +243,7 @@ echo "🧪 Step 8: Running basic tests..."
 
 # Test ROS 2 installation
 echo "Testing ROS 2 installation..."
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 if ros2 --help > /dev/null 2>&1; then
     echo "✅ ROS 2 command line tools working"
 else
