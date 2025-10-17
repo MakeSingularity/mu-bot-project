@@ -50,7 +50,7 @@
     "C_Cpp.default.cppStandard": "c++17",
     "terminal.integrated.env.linux": {
         "ROS_DOMAIN_ID": "0",
-        "RMW_IMPLEMENTATION": "rmw_cyclonedx_cpp"
+        "RMW_IMPLEMENTATION": "rmw_fastrtps_cpp"
     },
     "search.exclude": {
         "**/build": true,

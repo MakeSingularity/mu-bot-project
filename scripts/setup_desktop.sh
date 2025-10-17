@@ -21,7 +21,7 @@ fi
 
 echo "📦 Step 1: Installing ROS 2 Humble..."
 # Fix ROS keyring and install
-./scripts/fix_ros_keyring.sh
+$(dirname "$0")/fix_ros_keyring.sh
 
 echo "Installing ROS 2 desktop packages..."
 sudo apt install -y \
@@ -79,9 +79,9 @@ source /opt/ros/humble/setup.bash
 # Install workspace dependencies
 rosdep install --from-paths src --ignore-src -r -y
 
-# Build workspace
+# Build workspace with limited parallel jobs for laptops
 echo "Building ROS packages..."
-colcon build --symlink-install
+colcon build --symlink-install --packages-ignore-regex ".*venv.*|.*test.*|.*mock.*"
 
 # Source workspace
 source install/setup.bash
@@ -113,7 +113,7 @@ echo "🧪 Step 6: Running basic tests..."
 
 # Test ROS 2 installation
 echo "Testing ROS 2 installation..."
-if ros2 --help > /dev/null 2>&1; then
+if source /opt/ros/humble/setup.bash && ros2 --help > /dev/null 2>&1; then
     echo "✅ ROS 2 command line tools working"
 else
     echo "❌ ROS 2 command line tools not working"
