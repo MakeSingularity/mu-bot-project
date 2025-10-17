@@ -26,12 +26,19 @@ $(dirname "$0")/fix_ros_keyring.sh
 echo "Installing ROS 2 desktop packages..."
 sudo apt install -y \
     ros-humble-desktop \
-    ros-humble-gazebo-ros-pkgs \
+    ros-humble-ros-gz \
     ros-humble-robot-state-publisher \
     ros-humble-joint-state-publisher \
     ros-humble-xacro \
     python3-colcon-common-extensions \
     python3-rosdep
+
+echo "Installing Gazebo Garden..."
+# Add Gazebo Garden repository
+sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+sudo apt update
+sudo apt install -y gz-garden
 
 # Initialize rosdep
 if [ ! -d /etc/ros/rosdep ]; then
@@ -145,7 +152,7 @@ echo "1. Open a new terminal (to load environment variables)"
 echo "2. Test simulation:"
 echo "   cd $(pwd)"
 echo "   source venv/bin/activate"
-echo "   ros2 launch sim/launch/emu_gazebo.launch.py"
+echo "   ros2 launch sim/launch/emu_gazebo_garden.launch.py"
 echo ""
 echo "3. Test vision processing:"
 echo "   ros2 launch emu_vision emu_vision_launch.py simulation:=true"

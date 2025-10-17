@@ -64,7 +64,7 @@ cd mu-bot-project
 # Automated setup with ROS 2, development tools, and simulation
 ./scripts/setup_desktop.sh
 ```
-**Features**: Full ROS 2 desktop, Gazebo simulation, development tools, AI training environment
+**Features**: Full ROS 2 desktop, Gazebo Garden simulation, development tools, AI training environment
 
 #### 💻 Laptop Development Environment
 ```bash
@@ -230,7 +230,8 @@ If you prefer manual setup or need to customize the installation, see the detail
 
 - 📖 **[Complete Installation Guide](docs/quick_start_by_environment.md)** - Step-by-step manual setup
 - 🌐 **[Network Setup Guide](docs/network_setup.md)** - Multi-environment networking
-- 🔧 **[Troubleshooting Guide](#-troubleshooting)** - Common issues and solutions
+- � **[Gazebo Garden Migration Guide](docs/gazebo_garden_migration.md)** - Upgrade from Gazebo Classic
+- �🔧 **[Troubleshooting Guide](#-troubleshooting)** - Common issues and solutions
 
 The automated scripts above handle all the manual steps automatically, but these guides provide full details for customization.
 ```
@@ -239,16 +240,16 @@ The automated scripts above handle all the manual steps automatically, but these
 
 #### Continue with Additional ROS 2 Packages (All users)
 ```bash
-# Install additional ROS 2 packages
+# Install additional ROS 2 packages for Gazebo Garden
 sudo apt install \
-    ros-humble-gazebo-ros-pkgs \
+    ros-humble-ros-gz \
     ros-humble-robot-state-publisher \
     ros-humble-joint-state-publisher \
     ros-humble-xacro \
     python3-colcon-common-extensions \
     python3-rosdep
 
-# Install system dependencies for Python packages (prevents PyAudio compilation errors)
+# System dependencies for Python packages (prevents PyAudio compilation errors)
 sudo apt install \
     portaudio19-dev \
     python3-dev \
@@ -352,10 +353,16 @@ arecord -f cd -t wav -d 5 test.wav
 aplay test.wav
 ```
 
-### 5. Simulation (Gazebo)
+### 5. Simulation (Gazebo Garden)
 ```bash
-# Launch simulation environment
-ros2 launch sim/launch/emu_gazebo.launch.py
+# Test display compatibility first (important for WSL users)
+./scripts/test_gazebo_display.sh
+
+# Launch Gazebo Garden simulation environment
+ros2 launch sim/launch/emu_gazebo_garden.launch.py
+
+# For headless mode (recommended for WSL)
+ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false
 
 # Start vision processing
 ros2 launch emu_vision emu_vision_launch.py
@@ -363,6 +370,8 @@ ros2 launch emu_vision emu_vision_launch.py
 # Monitor human detection reports
 ros2 topic echo /emu/report
 ```
+
+**Note**: Gazebo Classic (gazebo11) reached end-of-life in January 2025. This project now uses Gazebo Garden for future-proofing and continued support.
 
 ## 📁 Repository Structure
 
@@ -475,18 +484,23 @@ python3 train_custom_models.py --model activity_classifier --export-onnx
 ## 🎮 Usage Examples
 
 ### Basic Operation
+
+#### Gazebo Garden Simulation (Recommended)
 ```bash
-# Start complete emu droid system
-ros2 launch emu_vision emu_vision_launch.py
+# Start headless simulation (works reliably in WSL)
+ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false
 
-# Monitor human detection
-ros2 topic echo /emu/report
+# For GUI (if your display setup supports it)
+ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=true
 
-# Control head movement
-ros2 topic pub /emu/head_cmd geometry_msgs/Twist '{angular: {z: 0.5}}'
+# Test your display compatibility first
+./scripts/test_gazebo_display.sh
+```
 
-# Emergency stop
-ros2 service call /emu/emergency_stop std_srvs/Empty
+#### Legacy Gazebo Classic (Deprecated - End of Life January 2025)
+```bash
+# Only use if Gazebo Garden isn't working
+ros2 launch sim/launch/emu_gazebo.launch.py
 ```
 
 ### Development Testing
@@ -505,14 +519,33 @@ python3 tests/integration_test.py
 
 ### Simulation Environment
 ```bash
-# Launch Gazebo world with human models
-ros2 launch sim/launch/emu_gazebo.launch.py world:=emu_testing_world.world
+# Launch Gazebo Garden world (current, supported)
+ros2 launch sim/launch/emu_gazebo_garden.launch.py
 
-# Control virtual human for testing
-ros2 topic pub /human/cmd_vel geometry_msgs/Twist '{linear: {x: 2.0}}'
+# Start vision processing
+ros2 launch emu_vision emu_vision_launch.py
 
-# Observe emu detection behavior
-ros2 topic echo /emu/human_position
+# Monitor human detection reports
+ros2 topic echo /emu/report
+
+# Control head movement
+ros2 topic pub /emu/head_cmd geometry_msgs/Twist '{angular: {z: 0.5}}'
+
+# Emergency stop
+ros2 service call /emu/emergency_stop std_srvs/Empty
+```
+
+### WSL Display Issues (Common in Windows)
+If Gazebo Garden GUI crashes in WSL, use headless mode:
+```bash
+# Test display compatibility
+./scripts/test_gazebo_display.sh
+
+# Use headless simulation
+ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false
+
+# Use RViz for visualization instead
+ros2 run rviz2 rviz2
 ```
 
 ## 📊 Performance Specifications
@@ -524,7 +557,10 @@ ros2 topic echo /emu/human_position
 | Speed Tracking Error | ±0.2 m/s | 🟡 In Progress |
 | Detection Range | 1-10 meters | 🟡 In Progress |
 | Audio Response Time | <2 seconds | 🟡 In Progress |
+| Simulation Environment | Modern, Supported | ✅ **Gazebo Garden Ready** |
 | Battery Life (Future) | 4+ hours | 🔴 Not Started |
+
+**Note**: Successfully migrated to Gazebo Garden for long-term support and modern simulation capabilities.
 
 ## 🛠️ Development Setup
 
@@ -698,7 +734,47 @@ sudo apt update
 sudo apt install ros-humble-desktop
 ```
 
-#### "Package 'emu_vision' not found"
+#### Gazebo Garden GUI Issues in WSL
+**Problem**: GUI crashes with segmentation fault in WSL environments
+**Root Cause**: OpenGL/graphics driver compatibility in Windows Subsystem for Linux
+**Solutions**:
+
+**Quick Fix - Use Headless Mode:**
+```bash
+# Test compatibility first
+./scripts/test_gazebo_display.sh
+
+# Use headless simulation (recommended for WSL)
+ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false
+
+# Use RViz for visualization
+ros2 run rviz2 rviz2 -d sim/config/emu_droid_sim.rviz
+```
+
+**Advanced WSL Graphics Setup:**
+```bash
+# Update WSL and enable WSLg (Windows 11)
+wsl --update
+wsl --shutdown && wsl
+
+# Fix runtime directory permissions
+sudo chmod 700 /run/user/1000
+
+# Add user to video group
+sudo usermod -a -G video $USER
+
+# Try software rendering
+export LIBGL_ALWAYS_SOFTWARE=1
+export QT_XCB_GL_INTEGRATION=none
+gz sim /path/to/world.sdf
+```
+
+**Alternative X Server Options:**
+- **VcXsrv**: Traditional X11 server for Windows
+- **X410**: Modern X server from Microsoft Store
+- **MobaXterm**: Includes built-in X server
+
+#### "Package 'gazebo_ros' not found" or "Package 'emu_vision' not found"
 **Problem**: ROS workspace not built or sourced
 **Solution**: Build and source the workspace
 ```bash
@@ -831,7 +907,7 @@ We welcome contributions to the Emu Droid project! Here's how to get involved:
 | **Production** | Jan 2026 - Aug 2026 | 5-unit build, field testing, demo preparation |
 | **🎪 Maker Faire** | **September 2026** | **🏆 Live demonstration of 5 walking emu droids** |
 
-**Current Status**: 🟢 Foundation Phase - Repository setup complete, hardware architecture defined
+**Current Status**: 🟢 Foundation Phase - Repository setup complete, Gazebo Garden migration successful, multi-environment architecture ready
 
 See [timeline.md](docs/timeline.md) for detailed project schedule and milestones.
 

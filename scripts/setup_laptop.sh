@@ -27,14 +27,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Installing ROS 2 desktop packages..."
 sudo apt install -y \
     ros-humble-desktop \
-    ros-humble-gazebo-ros-pkgs \
+    ros-humble-ros-gz \
     ros-humble-robot-state-publisher \
     ros-humble-joint-state-publisher \
     ros-humble-xacro \
     ros-humble-controller-manager \
-    ros-humble-gazebo-ros2-control \
     python3-colcon-common-extensions \
     python3-rosdep
+
+echo "Installing Gazebo Garden..."
+# Add Gazebo Garden repository
+sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+sudo apt update
+sudo apt install -y gz-garden
 
 # Initialize rosdep
 if [ ! -d /etc/ros/rosdep ]; then
@@ -297,12 +303,16 @@ echo "1. Open a new terminal (to load environment variables)"
 echo "2. Configure network connection:"
 echo "   ~/emu_network_config.sh"
 echo ""
-echo "3. Test local simulation:"
+echo "3. Test display compatibility (important for WSL users):"
+echo "   ./scripts/test_gazebo_display.sh"
+echo ""
+echo "4. Test local simulation:"
 echo "   cd $(pwd)"
 echo "   source venv/bin/activate"
-echo "   ros2 launch sim/launch/emu_gazebo.launch.py"
+echo "   ros2 launch sim/launch/emu_gazebo_garden.launch.py"
+echo "   # If GUI doesn't work, use: ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false"
 echo ""
-echo "4. Connect to remote droid:"
+echo "5. Connect to remote droid:"
 echo "   ros2 topic list  # Should show topics from remote system"
 echo "   ros2 topic echo /emu/report  # Listen to droid reports"
 echo ""
