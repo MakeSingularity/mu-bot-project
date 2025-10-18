@@ -111,8 +111,11 @@ After running the setup script for your environment:
 
 ### 🖥️ Desktop Testing
 ```bash
-# Test simulation environment
-ros2 launch sim/launch/emu_gazebo.launch.py
+# Test display compatibility first
+./scripts/test_gazebo_display.sh
+
+# Test simulation environment (Gazebo Garden)
+ros2 launch sim/launch/emu_gazebo_garden.launch.py
 
 # Test vision processing (simulated)
 ros2 launch emu_vision emu_vision_launch.py simulation:=true
@@ -487,14 +490,18 @@ python3 train_custom_models.py --model activity_classifier --export-onnx
 
 #### Gazebo Garden Simulation (Recommended)
 ```bash
-# Start headless simulation (works reliably in WSL)
+# Test display compatibility first (no venv needed)
+./scripts/test_gazebo_display.sh
+
+# Start headless simulation (works reliably in WSL - no venv needed)
 ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false
 
-# For GUI (if your display setup supports it)
+# For GUI (if your display setup supports it - no venv needed)
 ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=true
 
-# Test your display compatibility first
-./scripts/test_gazebo_display.sh
+# Start vision processing (venv recommended for Python nodes)
+source venv/bin/activate
+ros2 launch emu_vision emu_vision_launch.py
 ```
 
 #### Legacy Gazebo Classic (Deprecated - End of Life January 2025)
@@ -502,6 +509,20 @@ ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=true
 # Only use if Gazebo Garden isn't working
 ros2 launch sim/launch/emu_gazebo.launch.py
 ```
+
+### Virtual Environment Usage Guide
+
+**When to use venv:**
+- 🐍 Python package development and testing
+- 🔧 Installing Python dependencies (`pip install`)
+- 🚀 Running Python-based ROS nodes directly
+- 🧪 Mixed ROS + Python workflows (recommended for consistency)
+
+**When venv is NOT needed:**
+- 🤖 ROS 2 commands (`ros2 launch`, `ros2 topic`, etc.)
+- 🎮 Gazebo Garden simulation (`gz sim`)
+- 🔧 System package management (`sudo apt install`)
+- 📂 Git operations (`git commit`, `git push`)
 
 ### Development Testing
 ```bash
