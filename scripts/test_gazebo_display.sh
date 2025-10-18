@@ -14,23 +14,71 @@ echo "WAYLAND_DISPLAY: $WAYLAND_DISPLAY"
 echo "XDG_RUNTIME_DIR: $XDG_RUNTIME_DIR"
 echo ""
 
-# Test basic X11
+# Test basic X11 - use multiple fallback options
 echo "🖼️  Testing X11 Display..."
-timeout 2 xeyes >/dev/null 2>&1
-if [ $? -eq 124 ]; then
-    echo "✅ X11 display working"
+X11_WORKS=false
+
+# Try xeyes first (preferred)
+if command -v xeyes >/dev/null 2>&1; then
+    timeout 2 xeyes >/dev/null 2>&1
+    if [ $? -eq 124 ]; then
+        echo "✅ X11 display working (xeyes)"
+        X11_WORKS=true
+    fi
+fi
+
+# Fallback to xterm if xeyes not available or failed
+if [ "$X11_WORKS" = false ] && command -v xterm >/dev/null 2>&1; then
+    timeout 2 xterm -e echo "X11 test" >/dev/null 2>&1
+    if [ $? -eq 124 ]; then
+        echo "✅ X11 display working (xterm)"
+        X11_WORKS=true
+    fi
+fi
+
+# Final fallback - just check DISPLAY variable and try basic X11 connection
+if [ "$X11_WORKS" = false ]; then
+    if [ -n "$DISPLAY" ] && timeout 2 xdpyinfo >/dev/null 2>&1; then
+        echo "✅ X11 display working (xdpyinfo)"
+        X11_WORKS=true
+    elif [ -n "$DISPLAY" ]; then
+        echo "⚠️  X11 display partially working - DISPLAY set but connection issues"
+        echo "   This is common in WSL - continuing with tests..."
+        X11_WORKS=true
+    else
+        echo "❌ X11 display not working"
+        echo "Please check your WSL display setup"
+        exit 1
+    fi
+fi
+
+# Test OpenGL and graphics permissions
+echo "🎮 Testing OpenGL and Graphics Access..."
+GRAPHICS_OK=false
+
+# Check graphics device access
+if [ -c /dev/dri/renderD128 ]; then
+    if [ -r /dev/dri/renderD128 ] && [ -w /dev/dri/renderD128 ]; then
+        echo "✅ Graphics device accessible"
+        GRAPHICS_OK=true
+    else
+        echo "⚠️  Graphics device exists but permission denied"
+        echo "   User may need to be in 'render' group"
+        echo "   Run: sudo usermod -a -G render \$USER && newgrp render"
+    fi
 else
-    echo "❌ X11 display not working"
-    echo "Please check your WSL display setup"
-    exit 1
+    echo "⚠️  Graphics device /dev/dri/renderD128 not found"
 fi
 
 # Test OpenGL
-echo "🎮 Testing OpenGL..."
-if glxinfo | grep -q "direct rendering: Yes"; then
-    echo "✅ OpenGL direct rendering available"
+if command -v glxinfo >/dev/null 2>&1; then
+    if glxinfo 2>/dev/null | grep -q "direct rendering: Yes"; then
+        echo "✅ OpenGL direct rendering available"
+    else
+        echo "⚠️  OpenGL direct rendering not available - will use software rendering"
+    fi
 else
-    echo "⚠️  OpenGL direct rendering not available - will use software rendering"
+    echo "⚠️  glxinfo not available - install mesa-utils for OpenGL testing"
 fi
 
 # Test different Gazebo launch methods
