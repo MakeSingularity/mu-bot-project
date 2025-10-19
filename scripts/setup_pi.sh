@@ -198,17 +198,31 @@ sudo apt install -y \
     screen \
     tmux
 
-# Install camera utilities (Ubuntu packages)
-sudo apt install -y \
-    libcamera-apps \
-    libcamera-dev
+# Install camera utilities (Ubuntu packages - different names than Raspberry Pi OS)
+echo "Installing camera utilities..."
+if sudo apt install -y libcamera-tools libcamera0 2>/dev/null; then
+    echo "✅ Camera utilities installed (libcamera-tools)"
+elif sudo apt install -y libcamera-apps 2>/dev/null; then
+    echo "✅ Camera utilities installed (libcamera-apps)"
+else
+    echo "⚠️  Camera utilities installation failed - trying alternative packages..."
+    # Try individual packages that are more likely to exist
+    sudo apt install -y \
+        libcamera0 \
+        libcamera-ipa \
+        python3-libcamera 2>/dev/null || echo "⚠️  Some camera packages unavailable"
+fi
+
+# Install development headers if available
+sudo apt install -y libcamera-dev 2>/dev/null || echo "⚠️  libcamera-dev not available"
 
 # Install GPIO and hardware libraries (note: some packages may have different names on Ubuntu)
+echo "Installing GPIO and hardware libraries..."
 sudo apt install -y \
     python3-rpi.gpio \
     python3-gpiozero \
     pigpio \
-    python3-pigpio
+    python3-pigpio || echo "⚠️  Some GPIO packages may not be available on Ubuntu"
 
 echo ""
 echo "💻 Step 4: Installing Visual Studio Code (Development Tools)..."
@@ -516,10 +530,17 @@ fi
 
 echo "Testing camera access..."
 if command -v libcamera-hello >/dev/null 2>&1; then
-    echo "✅ Camera tools installed"
+    echo "✅ Camera tools installed (libcamera-hello available)"
     echo "Test cameras with: libcamera-hello --list-cameras"
+elif command -v libcamera-vid >/dev/null 2>&1; then
+    echo "✅ Camera tools installed (libcamera-vid available)"
+    echo "Test cameras with: libcamera-vid --list-cameras"
+elif dpkg -l | grep -q libcamera; then
+    echo "✅ Basic camera libraries installed"
+    echo "Note: Command-line tools may need separate installation"
 else
-    echo "⚠️  Camera tools not available (may need to install libcamera-apps)"
+    echo "⚠️  Camera tools not available - may need manual installation"
+    echo "   Try: sudo apt install libcamera-tools"
 fi
 
 echo "Testing ROS 2 installation..."
