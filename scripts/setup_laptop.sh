@@ -20,9 +20,9 @@ if ! grep -q "jammy" /etc/os-release; then
 fi
 
 echo "📦 Step 1: Installing ROS 2 Humble..."
-# Fix ROS keyring and install
+# Install ROS 2 using unified cross-platform installer
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/fix_ros_keyring.sh"
+"$SCRIPT_DIR/install_ros2_humble.sh"
 
 echo "Installing ROS 2 desktop packages..."
 sudo apt install -y \

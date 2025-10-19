@@ -48,11 +48,12 @@ sudo apt install -y \
     gnupg \
     lsb-release \
     apt-transport-https \
-    ca-certificates \
-    software-properties-common
+    ca-certificates
 
-# Fix ROS keyring and install
-$(dirname "$0")/fix_ros_keyring.sh
+# Note: software-properties-common not needed for Debian-based Pi OS
+
+# Install ROS 2 using unified cross-platform installer
+$(dirname "$0")/install_ros2_humble.sh
 
 echo "Installing ROS 2 Humble (Pi-optimized)..."
 # Install ROS base (lighter than desktop for Pi)
