@@ -234,16 +234,27 @@ sudo apt install -y ubuntu-desktop-minimal
 # Install VS Code for ARM64 Ubuntu
 echo "Installing VS Code for ARM64 architecture..."
 
-# Download and install Microsoft GPG key for VS Code
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
-sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+# Check if VS Code is already installed
+if command -v code > /dev/null 2>&1; then
+    echo "✅ VS Code already installed"
+else
+    # Clean up any existing Microsoft repositories and keys to avoid conflicts
+    echo "Cleaning up any existing Microsoft repositories..."
+    sudo rm -f /etc/apt/sources.list.d/vscode.list
+    sudo rm -f /etc/apt/trusted.gpg.d/packages.microsoft.gpg
+    sudo rm -f /usr/share/keyrings/microsoft.gpg
 
-# Update package cache and install VS Code
-sudo apt update
-sudo apt install -y code
+    # Download and install Microsoft GPG key for VS Code
+    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+    sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+    sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
 
-echo "✅ VS Code installed successfully"
+    # Update package cache and install VS Code
+    sudo apt update
+    sudo apt install -y code
+
+    echo "✅ VS Code installed successfully"
+fi
 
 # Install recommended VS Code extensions
 echo "Installing recommended VS Code extensions for Pi development..."

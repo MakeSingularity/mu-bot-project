@@ -163,6 +163,11 @@ echo "📝 Step 5: Installing VS Code..."
 if ! command -v code > /dev/null 2>&1; then
     echo "Installing Visual Studio Code..."
 
+    # Clean up any existing Microsoft repositories and keys to avoid conflicts
+    sudo rm -f /etc/apt/sources.list.d/vscode.list
+    sudo rm -f /etc/apt/trusted.gpg.d/packages.microsoft.gpg
+    sudo rm -f /usr/share/keyrings/microsoft.gpg
+
     # Add Microsoft GPG key and repository
     wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
     sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
