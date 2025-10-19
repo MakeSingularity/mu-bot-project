@@ -157,7 +157,58 @@ colcon build --symlink-install --packages-ignore-regex ".*venv.*|.*test.*|.*mock
 source install/setup.bash
 
 echo ""
-echo "⚙️  Step 5: Configuring environment..."
+echo "📝 Step 5: Installing VS Code..."
+
+# Install VS Code for unified development environment
+if ! command -v code > /dev/null 2>&1; then
+    echo "Installing Visual Studio Code..."
+
+    # Add Microsoft GPG key and repository
+    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+    sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+    sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+
+    # Update and install
+    sudo apt update
+    sudo apt install -y code
+
+    echo "✅ VS Code installed"
+else
+    echo "✅ VS Code already installed"
+fi
+
+# Install recommended VS Code extensions
+echo "Installing recommended VS Code extensions..."
+EXTENSIONS=(
+    "github.copilot"
+    "github.copilot-chat"
+    "ms-python.python"
+    "ms-python.flake8"
+    "ms-python.black-formatter"
+    "ms-vscode.cpptools"
+    "ms-vscode.cmake-tools"
+    "twxs.cmake"
+    "redhat.vscode-yaml"
+    "ms-vscode.vscode-json"
+    "streetsidesoftware.code-spell-checker"
+    "ms-vscode-remote.remote-ssh"
+    "ms-vscode-remote.remote-ssh-edit"
+    "ms-vscode.remote-explorer"
+    "ms-python.pylint"
+    "ms-toolsai.jupyter"
+)
+
+for ext in "${EXTENSIONS[@]}"; do
+    if code --list-extensions | grep -q "^$ext$"; then
+        echo "✅ Extension $ext already installed"
+    else
+        echo "Installing extension: $ext"
+        code --install-extension "$ext" --force
+    fi
+done
+
+echo ""
+echo "⚙️  Step 6: Configuring environment..."
 
 # Add ROS sourcing to bashrc if not already present
 if ! grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc; then
@@ -179,7 +230,7 @@ if ! grep -q "export ROS_DOMAIN_ID=42" ~/.bashrc; then
 fi
 
 echo ""
-echo "🧪 Step 6: Running basic tests..."
+echo "🧪 Step 7: Running basic tests..."
 
 # Test ROS 2 installation
 echo "Testing ROS 2 installation..."
@@ -234,7 +285,8 @@ echo "   - docs/quick_start_by_environment.md - Environment-specific guides"
 echo "   - docs/network_setup.md - Multi-environment networking"
 echo ""
 echo "🔧 Development Tools:"
-echo "   - code . (VSCode)"
+echo "   - code mu-bot.code-workspace (Open VS Code workspace)"
+echo "   - code . (VSCode in current directory)"
 echo "   - rqt_graph (ROS graph visualization)"
 echo "   - rviz2 (3D visualization)"
 echo ""

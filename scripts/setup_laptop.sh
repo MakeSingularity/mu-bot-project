@@ -222,7 +222,58 @@ fi
 source install/setup.bash
 
 echo ""
-echo "⚙️  Step 6: Configuring environment..."
+echo "📝 Step 6: Installing VS Code..."
+
+# Install VS Code for unified development environment
+if ! command -v code > /dev/null 2>&1; then
+    echo "Installing Visual Studio Code..."
+
+    # Add Microsoft GPG key and repository
+    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+    sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+    sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+
+    # Update and install
+    sudo apt update
+    sudo apt install -y code
+
+    echo "✅ VS Code installed"
+else
+    echo "✅ VS Code already installed"
+fi
+
+# Install recommended VS Code extensions
+echo "Installing recommended VS Code extensions..."
+EXTENSIONS=(
+    "github.copilot"
+    "github.copilot-chat"
+    "ms-python.python"
+    "ms-python.flake8"
+    "ms-python.black-formatter"
+    "ms-vscode.cpptools"
+    "ms-vscode.cmake-tools"
+    "twxs.cmake"
+    "redhat.vscode-yaml"
+    "ms-vscode.vscode-json"
+    "streetsidesoftware.code-spell-checker"
+    "ms-vscode-remote.remote-ssh"
+    "ms-vscode-remote.remote-ssh-edit"
+    "ms-vscode.remote-explorer"
+    "ms-python.pylint"
+    "ms-toolsai.jupyter"
+)
+
+for ext in "${EXTENSIONS[@]}"; do
+    if code --list-extensions | grep -q "^$ext$"; then
+        echo "✅ Extension $ext already installed"
+    else
+        echo "Installing extension: $ext"
+        code --install-extension "$ext" --force
+    fi
+done
+
+echo ""
+echo "⚙️  Step 7: Configuring environment..."
 
 # Add ROS sourcing to bashrc if not already present
 if ! grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc; then
@@ -386,6 +437,7 @@ echo "   - Monitor with: sudo tlp-stat"
 echo ""
 echo "🌐 Remote Development:"
 echo "   - Use ~/emu_network_config.sh to switch between environments"
+echo "   - code mu-bot.code-workspace (Open VS Code workspace)"
 echo "   - VSCode Remote-SSH for Pi development"
 echo "   - ROS tools work across network transparently"
 echo ""

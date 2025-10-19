@@ -9,7 +9,8 @@
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src:${env:PYTHONPATH}",
-                "ROS_DOMAIN_ID": "0"
+                "ROS_DOMAIN_ID": "0",
+                "RMW_IMPLEMENTATION": "rmw_fastrtps_cpp"
             },
             "args": [],
             "cwd": "${workspaceFolder}"
@@ -33,7 +34,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/ai/hailo/compile_hailo_models.py",
             "console": "integratedTerminal",
-            "args": ["--model", "yolov8n"],
+            "args": [
+                "--model",
+                "yolov8n"
+            ],
             "cwd": "${workspaceFolder}/ai/hailo"
         },
         {
@@ -42,7 +46,12 @@
             "request": "launch",
             "program": "${workspaceFolder}/ai/pytorch/train_custom_models.py",
             "console": "integratedTerminal",
-            "args": ["--model", "activity_classifier", "--dataset", "./mock_data"],
+            "args": [
+                "--model",
+                "activity_classifier",
+                "--dataset",
+                "./mock_data"
+            ],
             "cwd": "${workspaceFolder}/ai/pytorch"
         },
         {

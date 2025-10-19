@@ -1,0 +1,135 @@
+{
+    "folders": [
+        {
+            "name": "MU-Bot",
+            "path": "."
+        }
+    ],
+    "settings": {
+        // Inherit all settings from .vscode/settings.json
+    },
+    "extensions": {
+        "recommendations": [
+            "github.copilot",
+            "github.copilot-chat",
+            "ms-python.python",
+            "ms-python.flake8",
+            "ms-python.black-formatter",
+            "ms-vscode.cpptools",
+            "ms-vscode.cmake-tools",
+            "twxs.cmake",
+            "redhat.vscode-yaml",
+            "ms-vscode.vscode-json",
+            "streetsidesoftware.code-spell-checker",
+            "ms-vscode-remote.remote-ssh",
+            "ms-vscode-remote.remote-ssh-edit",
+            "ms-vscode.remote-explorer",
+            "ms-python.pylint",
+            "ms-toolsai.jupyter"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "ROS: Build All",
+                "type": "shell",
+                "command": "colcon",
+                "args": [
+                    "build",
+                    "--symlink-install"
+                ],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": false,
+                    "panel": "shared"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "ROS: Source Setup",
+                "type": "shell",
+                "command": "source",
+                "args": [
+                    "install/setup.bash"
+                ],
+                "group": "build",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "silent"
+                }
+            },
+            {
+                "label": "ROS: Launch Gazebo Simulation",
+                "type": "shell",
+                "command": "ros2",
+                "args": [
+                    "launch",
+                    "sim/launch/emu_gazebo.launch.py"
+                ],
+                "group": "test",
+                "dependsOn": "ROS: Source Setup",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "dedicated"
+                }
+            },
+            {
+                "label": "ROS: Launch Vision Node",
+                "type": "shell",
+                "command": "ros2",
+                "args": [
+                    "launch",
+                    "emu_vision",
+                    "emu_vision_launch.py"
+                ],
+                "group": "test",
+                "dependsOn": "ROS: Source Setup",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "dedicated"
+                }
+            },
+            {
+                "label": "Python: Format Code",
+                "type": "shell",
+                "command": "black",
+                "args": [
+                    "src/",
+                    "ai/",
+                    "tests/"
+                ],
+                "group": "build",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "silent"
+                }
+            },
+            {
+                "label": "Clean: Build Artifacts",
+                "type": "shell",
+                "command": "rm",
+                "args": [
+                    "-rf",
+                    "build/",
+                    "install/",
+                    "log/"
+                ],
+                "group": "build",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always"
+                }
+            }
+        ]
+    }
+}

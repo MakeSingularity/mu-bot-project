@@ -111,7 +111,7 @@ cd mu-bot-project
 # Automated setup with hardware interfaces and Pi optimizations
 ./scripts/setup_pi.sh
 ```
-**Features**: Hardware interfaces (I2C/SPI/Camera), audio HAT, GPIO, memory-optimized build, auto-start service
+**Features**: Hardware interfaces (I2C/SPI/Camera), audio HAT, GPIO, memory-optimized build, auto-start service, **VS Code IDE**
 
 ### 3️⃣ Environment-Specific Requirements
 

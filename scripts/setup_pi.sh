@@ -199,7 +199,31 @@ sudo apt install -y \
     python3-pigpio
 
 echo ""
-echo "🎵 Step 4: Configuring audio system..."
+echo "💻 Step 4: Installing Visual Studio Code (Development Tools)..."
+
+# Install desktop environment for VS Code GUI (if not already installed)
+echo "Installing minimal desktop environment for VS Code GUI..."
+sudo apt install -y ubuntu-desktop-minimal
+
+# Install VS Code for ARM64 Ubuntu
+echo "Installing VS Code for ARM64 architecture..."
+
+# Download and install Microsoft GPG key for VS Code
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+
+# Update package cache and install VS Code
+sudo apt update
+sudo apt install -y code
+
+echo "✅ VS Code installed successfully"
+echo "   GUI Mode: Connect monitor/VNC and run 'code .'"
+echo "   SSH Mode: Use VS Code Remote-SSH from desktop/laptop"
+echo "   Terminal Mode: Use 'code --help' for CLI options"
+
+echo ""
+echo "🎵 Step 5: Configuring audio system..."
 
 # Configure audio for WM8960 HAT (Ubuntu may need different setup)
 echo "Setting up WM8960 Audio HAT for Ubuntu..."
@@ -230,7 +254,7 @@ ctl.!default {
 EOF
 
 echo ""
-echo "📷 Step 5: Configuring camera system..."
+echo "📷 Step 6: Configuring camera system..."
 
 # Configure camera settings for stereo vision
 # Use the correct config.txt path for Ubuntu on Pi
@@ -267,7 +291,7 @@ else
 fi
 
 echo ""
-echo "🔌 Step 6: Configuring I2C and GPIO..."
+echo "🔌 Step 7: Configuring I2C and GPIO..."
 
 # Set I2C baudrate for faster communication with servos
 CONFIG_FILE="/boot/firmware/config.txt"
@@ -293,7 +317,7 @@ SUBSYSTEM=="spidev", GROUP="spi", MODE="0664"
 EOF
 
 echo ""
-echo "🐍 Step 7: Setting up Python environment..."
+echo "🐍 Step 8: Setting up Python environment..."
 
 # Clean up any corrupted virtual environment
 if [ -d "venv" ] && [ ! -f "venv/bin/activate" ]; then
@@ -336,7 +360,7 @@ pip install --upgrade pip setuptools wheel
 pip install -r requirements-pi.txt
 
 echo ""
-echo "🏗️  Step 8: Building ROS workspace (Pi-optimized)..."
+echo "🏗️  Step 9: Building ROS workspace (Pi-optimized)..."
 # Source ROS 2
 source /opt/ros/jazzy/setup.bash
 
@@ -363,7 +387,7 @@ colcon build --symlink-install --parallel-workers $BUILD_JOBS --packages-ignore-
 source install/setup.bash
 
 echo ""
-echo "⚙️  Step 9: Configuring environment..."
+echo "⚙️  Step 10: Configuring environment..."
 
 # Add ROS sourcing to bashrc
 if ! grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc; then
@@ -397,7 +421,7 @@ if ! grep -q "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" ~/.bashrc; then
 fi
 
 echo ""
-echo "🌐 Step 10: Network and services configuration..."
+echo "🌐 Step 11: Network and services configuration..."
 
 # Create systemd service for emu droid auto-start
 sudo tee /etc/systemd/system/emu-droid.service > /dev/null << EOF
@@ -460,7 +484,7 @@ chmod +x ~/configure_static_ip.sh
 echo "Created network configuration helper: ~/configure_static_ip.sh"
 
 echo ""
-echo "🧪 Step 11: Hardware testing..."
+echo "🧪 Step 12: Hardware testing..."
 
 echo "Testing I2C devices..."
 if command -v i2cdetect >/dev/null 2>&1; then
@@ -519,6 +543,7 @@ echo "✅ GPIO permissions set up"
 echo "✅ Memory-optimized ROS build"
 echo "✅ Pi-efficient RMW implementation"
 echo "✅ Auto-start service created (disabled)"
+echo "✅ Visual Studio Code installed for development"
 echo ""
 echo "📋 Next Steps:"
 echo "1. 🔄 REBOOT REQUIRED for hardware interface changes:"
@@ -533,10 +558,14 @@ echo "3. Test cameras:"
 echo "   libcamera-hello --list-cameras"
 echo "   libcamera-hello --camera 0 --timeout 5000"
 echo ""
-echo "4. Start droid operation:"
+echo "4. Open project in VS Code for development:"
+echo "   code ."
+echo "   # Install recommended extensions: Python, ROS, C/C++"
+echo ""
+echo "5. Start droid operation:"
 echo "   ros2 launch emu_vision emu_vision_launch.py hardware:=true"
 echo ""
-echo "5. Monitor system resources:"
+echo "6. Monitor system resources:"
 echo "   htop"
 echo "   vcgencmd measure_temp"
 echo ""
@@ -559,6 +588,12 @@ echo "📚 Documentation:"
 echo "   - README.md - Full installation guide"
 echo "   - hardware/wiring_guide.md - HAT connections"
 echo "   - tests/ - Hardware validation scripts"
+echo ""
+echo "💻 Development Tools:"
+echo "   - code . (VS Code - full IDE for Pi development)"
+echo "   - ssh user@pi-ip (Remote development from desktop/laptop)"
+echo "   - htop (system monitoring)"
+echo "   - tmux/screen (persistent terminal sessions)"
 echo ""
 
 # Final environment check
