@@ -109,7 +109,17 @@ Each setup script automatically installs the correct Python dependencies:
 
 After running the setup script for your environment:
 
-### 🖥️ Desktop Testing
+### � Build the ROS Workspace
+First, build all ROS packages:
+```bash
+# Build the workspace with optimizations
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# Source the workspace (required for each new terminal)
+source install/setup.bash
+```
+
+### �🖥️ Desktop Testing
 ```bash
 # Test display compatibility first
 ./scripts/test_gazebo_display.sh
