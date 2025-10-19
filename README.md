@@ -80,6 +80,17 @@ cd mu-bot
 - ✅ Creates proper symlinks for ROS 2 launch file compatibility
 
 #### 🤖 Raspberry Pi Droid Hardware
+
+**Prerequisites:**
+1. **OS**: Flash **Raspberry Pi OS Desktop 64-bit** (latest version) to your SD card
+2. **Initial Setup**: Complete the basic Pi setup wizard:
+   - Set username/password
+   - Enable SSH (for remote access)
+   - Connect to WiFi
+   - Update system: `sudo apt update && sudo apt upgrade -y`
+3. **Hardware**: Ensure your Pi 5 has adequate power supply (5V/5A recommended)
+
+**Automated Setup:**
 ```bash
 # Automated setup with hardware interfaces and Pi optimizations
 ./scripts/setup_pi.sh
