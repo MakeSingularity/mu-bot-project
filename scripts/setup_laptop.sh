@@ -225,21 +225,53 @@ echo ""
 echo "📝 Step 6: Installing VS Code..."
 
 # Install VS Code for unified development environment
-if ! command -v code > /dev/null 2>&1; then
-    echo "Installing Visual Studio Code..."
+# Check if running in WSL
+if grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "🐧 WSL environment detected"
 
-    # Add Microsoft GPG key and repository
-    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-    sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
-    sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-
-    # Update and install
-    sudo apt update
-    sudo apt install -y code
-
-    echo "✅ VS Code installed"
+    # In WSL, check if Windows VS Code is accessible
+    if command -v code.cmd > /dev/null 2>&1; then
+        echo "✅ VS Code accessible via Windows (code.cmd)"
+        # Create a wrapper script for seamless usage
+        if [ ! -f "/usr/local/bin/code" ]; then
+            sudo tee /usr/local/bin/code > /dev/null << 'EOF'
+#!/bin/bash
+exec code.cmd "$@"
+EOF
+            sudo chmod +x /usr/local/bin/code
+            echo "✅ Created VS Code wrapper for WSL"
+        fi
+    elif [ -f "/mnt/c/Users/*/AppData/Local/Programs/Microsoft VS Code/bin/code" ]; then
+        echo "✅ VS Code found in Windows, creating wrapper..."
+        CODE_PATH=$(find /mnt/c/Users/*/AppData/Local/Programs/Microsoft\ VS\ Code/bin/code 2>/dev/null | head -1)
+        sudo tee /usr/local/bin/code > /dev/null << EOF
+#!/bin/bash
+exec "$CODE_PATH" "\$@"
+EOF
+        sudo chmod +x /usr/local/bin/code
+    else
+        echo "⚠️  VS Code not found in Windows. Please install VS Code on Windows first."
+        echo "   Download from: https://code.visualstudio.com/"
+        echo "   After installation, this script can create a wrapper."
+    fi
 else
-    echo "✅ VS Code already installed"
+    # Native Linux installation
+    if ! command -v code > /dev/null 2>&1; then
+        echo "Installing Visual Studio Code for Linux..."
+
+        # Add Microsoft GPG key and repository
+        wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+        sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+        sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+
+        # Update and install
+        sudo apt update
+        sudo apt install -y code
+
+        echo "✅ VS Code installed"
+    else
+        echo "✅ VS Code already installed"
+    fi
 fi
 
 # Install recommended VS Code extensions
@@ -263,14 +295,25 @@ EXTENSIONS=(
     "ms-toolsai.jupyter"
 )
 
-for ext in "${EXTENSIONS[@]}"; do
-    if code --list-extensions | grep -q "^$ext$"; then
-        echo "✅ Extension $ext already installed"
-    else
-        echo "Installing extension: $ext"
-        code --install-extension "$ext" --force
-    fi
-done
+# Check if code command is accessible before installing extensions
+if command -v code > /dev/null 2>&1; then
+    for ext in "${EXTENSIONS[@]}"; do
+        if code --list-extensions 2>/dev/null | grep -q "^$ext$"; then
+            echo "✅ Extension $ext already installed"
+        else
+            echo "Installing extension: $ext"
+            if code --install-extension "$ext" --force 2>/dev/null; then
+                echo "✅ Installed $ext"
+            else
+                echo "⚠️  Failed to install $ext (may need manual installation)"
+            fi
+        fi
+    done
+else
+    echo "⚠️  VS Code command not accessible - extensions will need manual installation"
+    echo "   In WSL: Open VS Code on Windows, then use Ctrl+Shift+P → 'Extensions: Install Extensions'"
+    echo "   Install these extensions: ${EXTENSIONS[*]}"
+fi
 
 echo ""
 echo "⚙️  Step 7: Configuring environment..."
@@ -439,6 +482,10 @@ echo "🌐 Remote Development:"
 echo "   - Use ~/emu_network_config.sh to switch between environments"
 echo "   - code mu-bot.code-workspace (Open VS Code workspace)"
 echo "   - VSCode Remote-SSH for Pi development"
+if grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "   - WSL: Use VS Code on Windows with Remote-WSL extension"
+    echo "   - WSL: 'code .' from Linux opens in Windows VS Code"
+fi
 echo "   - ROS tools work across network transparently"
 echo ""
 echo "📚 Documentation:"
@@ -454,5 +501,9 @@ echo "  Python virtual environment: $(which python3)"
 echo "  ROS 2 distro: ${ROS_DISTRO:-not sourced}"
 echo "  Power management: $(systemctl is-enabled tlp 2>/dev/null || echo 'not configured')"
 echo "  Build optimization: $BUILD_JOBS parallel jobs"
+if grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "  Environment: WSL (Windows Subsystem for Linux)"
+    echo "  VS Code: $(command -v code > /dev/null && echo 'accessible' || echo 'needs Windows installation')"
+fi
 echo ""
 echo "✨ Happy mobile developing! ✨"

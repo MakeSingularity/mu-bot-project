@@ -121,8 +121,20 @@ if ! grep -q "start_x=1" "$CONFIG_FILE"; then
 fi
 
 # Configure SSH (should already be enabled in Ubuntu Server)
-sudo systemctl enable ssh
-sudo systemctl start ssh
+if systemctl is-active --quiet sshd; then
+    echo "✅ SSH service already running"
+elif systemctl is-active --quiet ssh; then
+    echo "✅ SSH service already running"
+else
+    # Try sshd first (Ubuntu 24.04), then ssh (older versions)
+    if systemctl enable sshd 2>/dev/null && systemctl start sshd 2>/dev/null; then
+        echo "✅ SSH service (sshd) enabled and started"
+    elif systemctl enable ssh 2>/dev/null && systemctl start ssh 2>/dev/null; then
+        echo "✅ SSH service (ssh) enabled and started"
+    else
+        echo "⚠️  SSH service configuration failed - manual setup may be needed"
+    fi
+fi
 
 echo "Hardware interfaces configured. Will require reboot later."
 
