@@ -276,23 +276,35 @@ EXTENSIONS=(
 
 # Check if code command is accessible before installing extensions
 if command -v code > /dev/null 2>&1; then
-    for ext in "${EXTENSIONS[@]}"; do
-        if code --list-extensions 2>/dev/null | grep -q "^$ext$"; then
-            echo "✅ Extension $ext already installed"
-        else
-            echo "Installing extension: $ext"
-            if code --install-extension "$ext" --force 2>/dev/null; then
-                echo "✅ Installed $ext"
+    echo "Testing VS Code accessibility..."
+
+    # Test if VS Code can run (sometimes needs display environment)
+    if code --version > /dev/null 2>&1; then
+        echo "✅ VS Code is accessible"
+
+        for ext in "${EXTENSIONS[@]}"; do
+            if code --list-extensions 2>/dev/null | grep -q "^$ext$"; then
+                echo "✅ Extension $ext already installed"
             else
-                echo "⚠️  Failed to install $ext (may need manual installation)"
+                echo "Installing extension: $ext"
+                # Add timeout and better error handling
+                if timeout 30 code --install-extension "$ext" --force 2>/dev/null; then
+                    echo "✅ Installed $ext"
+                else
+                    echo "⚠️  Failed to install $ext (may need manual installation)"
+                fi
             fi
-        fi
-    done
+        done
+    else
+        echo "⚠️  VS Code requires display environment - extensions will need manual installation"
+        echo "   Connect via SSH with X11 forwarding: ssh -X pi@your-pi-ip"
+        echo "   Or install extensions manually after connecting display"
+    fi
 else
     echo "⚠️  VS Code command not accessible - extensions will need manual installation"
 fi
 
-echo "   GUI Mode: Connect monitor/VNC and run 'code .'"
+echo "   GUI Mode: Connect monitor/VNC and run 'code /home/$USER/mu-bot' or 'code .'"
 echo "   SSH Mode: Use VS Code Remote-SSH from desktop/laptop"
 echo "   Terminal Mode: Use 'code --help' for CLI options"
 
@@ -380,6 +392,17 @@ fi
 
 # Configure GPIO for servo control and sensors
 echo "Setting up GPIO permissions..."
+
+# Create groups if they don't exist (Ubuntu may not have all by default)
+for group in gpio i2c spi dialout; do
+    if ! getent group $group > /dev/null 2>&1; then
+        echo "Creating group: $group"
+        sudo groupadd $group
+    fi
+done
+
+# Add user to hardware groups
+echo "Adding user $USER to hardware groups..."
 sudo usermod -a -G gpio,i2c,spi,dialout $USER
 
 # Create GPIO configuration
@@ -630,6 +653,21 @@ echo "📋 Next Steps:"
 echo "1. 🔄 REBOOT REQUIRED for hardware interface changes:"
 echo "   sudo reboot"
 echo ""
+echo "2. ⚡ Fix current session group membership:"
+echo "   newgrp gpio  # Apply new group membership without reboot"
+echo "   groups       # Verify you're in gpio, i2c, spi groups"
+echo ""
+echo "3. 🎯 Open VS Code in correct location:"
+echo "   cd ~/mu-bot"
+echo "   code .                           # Opens current project"
+echo "   # OR"
+echo "   code ~/mu-bot/mu-bot.code-workspace  # Opens workspace file"
+echo ""
+echo "4. 🧩 If VS Code extensions failed, install manually:"
+echo "   - Open VS Code → Ctrl+Shift+X (Extensions)"
+echo "   - Search and install: GitHub Copilot, Python, C/C++"
+echo "   - Sign in to GitHub: Ctrl+Shift+P → 'GitHub: Sign in'"
+echo ""
 echo "2. After reboot, test hardware:"
 echo "   cd $(pwd)"
 echo "   source venv/bin/activate"
@@ -671,10 +709,18 @@ echo "   - hardware/wiring_guide.md - HAT connections"
 echo "   - tests/ - Hardware validation scripts"
 echo ""
 echo "💻 Development Tools:"
-echo "   - code . (VS Code - full IDE for Pi development)"
-echo "   - ssh user@pi-ip (Remote development from desktop/laptop)"
+echo "   - cd ~/mu-bot && code . (VS Code - open project properly)"
+echo "   - code ~/mu-bot/mu-bot.code-workspace (Open VS Code workspace)"
+echo "   - ssh -X user@pi-ip (Remote development with X11 forwarding)"
 echo "   - htop (system monitoring)"
 echo "   - tmux/screen (persistent terminal sessions)"
+echo ""
+echo "🔧 VS Code Setup:"
+echo "   1. If extensions failed to install, manually install in VS Code:"
+echo "      - Ctrl+Shift+X → Search 'GitHub Copilot' → Install"
+echo "      - Also install: Python, C/C++, CMake Tools"
+echo "   2. Always open VS Code from project directory: cd ~/mu-bot && code ."
+echo "   3. For remote development: ssh -X pi@ip then code ~/mu-bot"
 echo ""
 
 # Final environment check
