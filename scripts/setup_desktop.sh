@@ -8,9 +8,9 @@ echo "🖥️  Emu Droid Desktop Development Station Setup"
 echo "=============================================="
 echo ""
 
-# Check if running on Ubuntu 22.04
-if ! grep -q "jammy" /etc/os-release; then
-    echo "⚠️  Warning: This script is designed for Ubuntu 22.04 (Jammy)"
+# Check if running on Ubuntu 24.04
+if ! grep -q "noble" /etc/os-release; then
+    echo "⚠️  Warning: This script is designed for Ubuntu 24.04 LTS (Noble)"
     echo "Your system may be different. Continue? (y/N)"
     read -r response
     if [[ ! "$response" =~ ^[Yy]$ ]]; then

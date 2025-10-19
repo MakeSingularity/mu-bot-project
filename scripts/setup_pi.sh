@@ -8,7 +8,7 @@ echo "🤖 Emu Droid Raspberry Pi Hardware Setup"
 echo "========================================"
 echo ""
 
-# Check if running on Raspberry Pi
+# Check if running on Raspberry Pi with Ubuntu 24.04
 if ! grep -q "Raspberry Pi" /proc/cpuinfo 2>/dev/null; then
     echo "⚠️  Warning: This script is designed for Raspberry Pi"
     echo "Your system may be different. Continue? (y/N)"
@@ -19,23 +19,51 @@ if ! grep -q "Raspberry Pi" /proc/cpuinfo 2>/dev/null; then
     fi
 fi
 
-# Check for Raspberry Pi OS (Debian-based)
-if ! command -v raspi-config >/dev/null 2>&1; then
-    echo "❌ This script requires Raspberry Pi OS"
-    echo "Please flash Raspberry Pi OS (64-bit) and try again"
-    exit 1
+# Check for Ubuntu 24.04 on Pi
+if ! grep -q "noble" /etc/os-release 2>/dev/null; then
+    echo "⚠️  Warning: This script is designed for Ubuntu 24.04 LTS (Noble) on Raspberry Pi"
+    echo "Your system may be different. Continue? (y/N)"
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        echo "Exiting..."
+        exit 1
+    fi
 fi
 
 echo "🔧 Step 1: Configuring Raspberry Pi interfaces..."
 
-# Enable I2C, SPI, Camera interfaces non-interactively
-echo "Enabling hardware interfaces..."
-sudo raspi-config nonint do_i2c 0      # Enable I2C
-sudo raspi-config nonint do_spi 0      # Enable SPI
-sudo raspi-config nonint do_camera 0   # Enable Camera
-sudo raspi-config nonint do_ssh 0      # Enable SSH
+# Enable hardware interfaces for Ubuntu on Pi
+echo "Configuring hardware interfaces for Ubuntu on Pi..."
 
-# Note: GPU memory split is now automatically managed by the firmware in newer Pi OS versions
+# Create/update config.txt for hardware interfaces
+CONFIG_FILE="/boot/firmware/config.txt"
+if [ ! -f "$CONFIG_FILE" ]; then
+    # Fallback for older Ubuntu Pi images
+    CONFIG_FILE="/boot/config.txt"
+fi
+
+# Enable I2C
+if ! grep -q "dtparam=i2c_arm=on" "$CONFIG_FILE"; then
+    echo "dtparam=i2c_arm=on" | sudo tee -a "$CONFIG_FILE"
+    echo "Enabled I2C interface"
+fi
+
+# Enable SPI
+if ! grep -q "dtparam=spi=on" "$CONFIG_FILE"; then
+    echo "dtparam=spi=on" | sudo tee -a "$CONFIG_FILE"
+    echo "Enabled SPI interface"
+fi
+
+# Enable Camera
+if ! grep -q "start_x=1" "$CONFIG_FILE"; then
+    echo "start_x=1" | sudo tee -a "$CONFIG_FILE"
+    echo "Enabled Camera interface"
+fi
+
+# Configure SSH (should already be enabled in Ubuntu Server)
+sudo systemctl enable ssh
+sudo systemctl start ssh
+
 echo "Hardware interfaces configured. Will require reboot later."
 
 echo ""
@@ -97,27 +125,37 @@ sudo apt install -y \
     screen \
     tmux
 
-# Install camera utilities
+# Install camera utilities (Ubuntu packages)
 sudo apt install -y \
     libcamera-apps \
-    libcamera-dev \
-    python3-picamera2
+    libcamera-dev
 
-# Install GPIO and hardware libraries
+# Install GPIO and hardware libraries (note: some packages may have different names on Ubuntu)
 sudo apt install -y \
     python3-rpi.gpio \
     python3-gpiozero \
-    rpi.gpio-common \
     pigpio \
     python3-pigpio
 
 echo ""
 echo "🎵 Step 4: Configuring audio system..."
 
-# Configure audio for WM8960 HAT
-echo "Setting up WM8960 Audio HAT..."
+# Configure audio for WM8960 HAT (Ubuntu may need different setup)
+echo "Setting up WM8960 Audio HAT for Ubuntu..."
 
-# Install WM8960 drivers
+# Note: Ubuntu on Pi may require different audio setup than Raspberry Pi OS
+# Check if the WM8960 device tree overlay is supported
+CONFIG_FILE="/boot/firmware/config.txt"
+if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="/boot/config.txt"
+fi
+
+if ! grep -q "dtoverlay=seeed-2mic-voicecard" "$CONFIG_FILE"; then
+    echo "dtoverlay=seeed-2mic-voicecard" | sudo tee -a "$CONFIG_FILE"
+    echo "Added WM8960 device tree overlay"
+fi
+
+# Configure ALSA for WM8960 (may need adjustment for Ubuntu)
 sudo tee /etc/asound.conf > /dev/null << 'EOF'
 pcm.!default {
     type asym
@@ -130,21 +168,24 @@ ctl.!default {
 }
 EOF
 
-# Add WM8960 device tree overlay
-if ! grep -q "dtoverlay=seeed-2mic-voicecard" /boot/config.txt; then
-    echo "dtoverlay=seeed-2mic-voicecard" | sudo tee -a /boot/config.txt
-    echo "Added WM8960 device tree overlay"
-fi
-
 echo ""
 echo "📷 Step 5: Configuring camera system..."
 
 # Configure camera settings for stereo vision
-sudo tee /boot/camera_config.txt > /dev/null << 'EOF'
-# Emu Droid Stereo Camera Configuration
-# Optimized for dual Arducam 5MP OV5647 cameras
+# Use the correct config.txt path for Ubuntu on Pi
+CONFIG_FILE="/boot/firmware/config.txt"
+if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="/boot/config.txt"
+fi
 
-# Enable both camera ports
+# Add camera configuration if not already present
+if ! grep -q "# Emu Droid Stereo Camera Configuration" "$CONFIG_FILE"; then
+    sudo tee -a "$CONFIG_FILE" > /dev/null << 'EOF'
+
+# Emu Droid Stereo Camera Configuration
+# Optimized for dual cameras on Ubuntu Pi
+
+# Enable camera and allocate GPU memory
 start_x=1
 gpu_mem=128
 
@@ -159,13 +200,22 @@ gpu_freq=500
 arm_freq=2000
 over_voltage=2
 EOF
+    echo "Added camera configuration to $CONFIG_FILE"
+else
+    echo "Camera configuration already present"
+fi
 
 echo ""
 echo "🔌 Step 6: Configuring I2C and GPIO..."
 
 # Set I2C baudrate for faster communication with servos
-if ! grep -q "dtparam=i2c_arm_baudrate" /boot/config.txt; then
-    echo "dtparam=i2c_arm_baudrate=400000" | sudo tee -a /boot/config.txt
+CONFIG_FILE="/boot/firmware/config.txt"
+if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="/boot/config.txt"
+fi
+
+if ! grep -q "dtparam=i2c_arm_baudrate" "$CONFIG_FILE"; then
+    echo "dtparam=i2c_arm_baudrate=400000" | sudo tee -a "$CONFIG_FILE"
     echo "Configured I2C for 400kHz operation"
 fi
 
@@ -347,7 +397,7 @@ if command -v libcamera-hello >/dev/null 2>&1; then
     echo "✅ Camera tools installed"
     echo "Test cameras with: libcamera-hello --list-cameras"
 else
-    echo "❌ Camera tools not installed properly"
+    echo "⚠️  Camera tools not available (may need to install libcamera-apps)"
 fi
 
 echo "Testing ROS 2 installation..."
@@ -432,7 +482,7 @@ echo "  Python virtual environment: $(which python3)"
 echo "  ROS 2 distro: ${ROS_DISTRO:-not sourced}"
 echo "  EMU_ENVIRONMENT: ${EMU_ENVIRONMENT:-not set}"
 echo "  Build optimization: $BUILD_JOBS parallel jobs"
-echo "  Hardware interfaces: $(raspi-config nonint get_i2c)$(raspi-config nonint get_spi)$(raspi-config nonint get_camera) (0=enabled)"
+echo "  Hardware interfaces: Check /boot/firmware/config.txt or /boot/config.txt"
 echo ""
 echo "⚠️  IMPORTANT: Reboot required for hardware changes to take effect!"
 echo "After reboot: sudo reboot"
