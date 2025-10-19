@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Launch file for Emu Droid Gazebo Garden simulation
+Launch file for Emu Droid Gazebo Sim 8 (Harmonic) simulation
 
-This launch file starts the complete simulation environment using the new Gazebo Garden including:
-- Gazebo Garden world with testing environment
+This launch file starts the complete simulation environment using Gazebo Sim 8 including:
+- Gazebo Sim 8 world with testing environment
 - Emu droid robot model with physics
 - Camera sensors for stereo vision
 - ROS 2 control interfaces for joint control
 - Robot state publisher for TF tree
 
 Usage:
-    ros2 launch emu_droid_sim emu_gazebo_garden.launch.py
-    ros2 launch emu_droid_sim emu_gazebo_garden.launch.py world:=empty.sdf
+    ros2 launch emu_droid_sim emu_gazebo_sim8.launch.py
+    ros2 launch emu_droid_sim emu_gazebo_sim8.launch.py world:=empty.sdf
 """
 
 import os
@@ -29,7 +29,7 @@ from launch.event_handlers import OnProcessExit
 
 
 def generate_launch_description():
-    """Generate launch description for emu droid Gazebo Garden simulation."""
+    """Generate launch description for emu droid Gazebo Sim 8 simulation."""
 
     # Get package directories
     pkg_sim_dir = '/home/bozman/mu-bot/sim'  # Direct path for now
@@ -113,7 +113,7 @@ def generate_launch_description():
         condition=IfCondition('false')  # Disabled by default since ros2_control handles it
     )
 
-    # Start Gazebo Garden - using ExecuteProcess for better control
+    # Start Gazebo Sim 8 - using ExecuteProcess for better control
     gz_world_path = os.path.join(pkg_sim_dir, 'worlds', 'emu_testing_world.sdf')
 
     start_gazebo = ExecuteProcess(
@@ -123,7 +123,7 @@ def generate_launch_description():
             '-s'  # Start in headless mode by default due to WSL GUI issues
         ],
         output='screen',
-        name='gazebo_garden'
+        name='gazebo_sim8'
     )
 
     # Alternative GUI launcher (enable manually if needed)
@@ -133,9 +133,9 @@ def generate_launch_description():
             f'export LIBGL_ALWAYS_SOFTWARE=1 && export QT_XCB_GL_INTEGRATION=none && gz sim {gz_world_path}'
         ],
         output='screen',
-        name='gazebo_garden_gui',
+        name='gazebo_sim8_gui',
         condition=IfCondition('false')  # Disabled by default due to WSL issues
-    )    # Spawn robot in Gazebo Garden
+    )    # Spawn robot in Gazebo Sim 8
     spawn_entity = Node(
         package='ros_gz_sim',
         executable='create',

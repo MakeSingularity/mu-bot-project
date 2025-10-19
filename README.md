@@ -1,8 +1,8 @@
 # Emu Droid Companion Robot 🦆🤖
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-blue.svg)](https://docs.ros.org/en/humble/)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org/)
+[![ROS 2 Jazzy](https://img.shields.io/badge/ROS_2-Jazzy-blue.svg)](https://docs.ros.org/en/jazzy/)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12+-green.svg)](https://www.python.org/)
 [![Hailo AI](https://img.shields.io/badge/Hailo_AI-26_TOPS-purple.svg)](https://hailo.ai/)
 
 A bipedal companion robot inspired by an emu, designed for observe-and-report tasks using cutting-edge AI acceleration and open-source hardware.
@@ -47,11 +47,11 @@ Desktop (ROS Master) ←→ Laptop (Remote Dev) ←→ Droid (Hardware)
 
 ## 🚀 Automated Installation by Environment
 
-**Prerequisites**: Ubuntu 22.04 LTS, Git, internet connection
+**Prerequisites**: Ubuntu 24.04 LTS, Git, internet connection
 
-> **⚠️ COMPATIBILITY REQUIREMENT**: All devices must run **Ubuntu 22.04 LTS** with **Python 3.10** for ROS 2 Humble compatibility. See [COMPATIBILITY.md](COMPATIBILITY.md) for full requirements.
+> **⚠️ COMPATIBILITY REQUIREMENT**: All devices must run **Ubuntu 24.04 LTS** with **Python 3.12** for ROS 2 Jazzy compatibility. See [COMPATIBILITY.md](COMPATIBILITY.md) for full requirements.
 
-> **✨ New in v2.1**: Setup scripts now automatically handle all common issues including virtual environment conflicts, ROS 2 middleware configuration, and path resolution. Scripts work from any directory!
+> **✨ New in v2.2**: Setup scripts now automatically handle all prerequisites including git installation, virtual environment management, Gazebo Sim 8 integration, and comprehensive error checking. Complete one-stop installation!
 
 ### 1️⃣ Clone Repository (All Environments)
 ```bash
@@ -63,40 +63,51 @@ cd mu-bot
 
 #### 🖥️ Desktop Development Station
 ```bash
-# Automated setup with ROS 2, development tools, and simulation
+# Clone repository and run automated setup
+git clone https://github.com/makesingularity/mu-bot-project.git
+cd mu-bot-project
 ./scripts/setup_desktop.sh
 ```
-**Features**: Full ROS 2 desktop, Gazebo Garden simulation, development tools, AI training environment
+**Features**: Full ROS 2 Jazzy desktop, Gazebo Sim 8 (Harmonic), development tools, AI training environment
 
 #### 💻 Laptop Development Environment
 ```bash
-# Automated setup with power optimizations and remote development tools
+# Clone repository and run automated setup
+git clone https://github.com/makesingularity/mu-bot-project.git
+cd mu-bot-project
 ./scripts/setup_laptop.sh
 ```
-**Features**: Same as desktop + power management, network configuration helper, portable optimizations
+**Features**: Same as desktop + power management (TLP), network configuration helper, portable optimizations
 
-**Recent Improvements** (v2.1):
-- ✅ Fixed virtual environment conflicts with colcon build
-- ✅ Auto-configures RMW implementation for ROS 2 compatibility
-- ✅ Resolves path issues - runs from any directory
-- ✅ Creates proper symlinks for ROS 2 launch file compatibility
+**Recent Improvements** (v2.2):
+- ✅ Ubuntu 24.04 LTS + ROS 2 Jazzy + Python 3.12 support
+- ✅ Gazebo Sim 8 (Harmonic) integration - no separate installation needed
+- ✅ Comprehensive prerequisites checking (permissions, disk space, internet)
+- ✅ Robust Python virtual environment management with error recovery
+- ✅ One-stop installation - handles all dependencies automatically
 
 #### 🤖 Raspberry Pi Droid Hardware
 
 **Prerequisites:**
-1. **OS**: Flash **Raspberry Pi OS Desktop 64-bit (Legacy/Ubuntu 22.04 base)** to your SD card
-   - ⚠️ **CRITICAL**: Do NOT use Debian 13 (trixie) - incompatible with ROS 2 Humble
-   - ✅ **Required**: Ubuntu 22.04 base or Raspberry Pi OS Legacy for Python 3.10 compatibility
-2. **Initial Setup**: Complete the basic Pi setup wizard:
-   - Set username/password
-   - Enable SSH (for remote access)
-   - Connect to WiFi
+1. **OS**: Flash **Ubuntu 24.04 LTS Server (64-bit) for Raspberry Pi** to your SD card
+   - ⚠️ **CRITICAL**: Use Ubuntu 24.04 LTS (Noble) for ROS 2 Jazzy compatibility
+   - ✅ **Required**: Ubuntu 24.04 LTS for Python 3.12 and modern ROS 2 support
+2. **Initial Setup**: Complete the basic Ubuntu setup:
+   - Set username/password during first boot
+   - Enable SSH: `sudo systemctl enable ssh && sudo systemctl start ssh`
+   - Connect to WiFi: `sudo nmcli dev wifi connect "SSID" password "PASSWORD"`
    - Update system: `sudo apt update && sudo apt upgrade -y`
-   - **Verify Python**: Run `python3 --version` - must be 3.10.x
+   - **Install Git**: `sudo apt install -y git` (required for cloning repository)
+   - **Verify Python**: Run `python3 --version` - should be 3.12.x
 3. **Hardware**: Ensure your Pi 5 has adequate power supply (5V/5A recommended)
 
-**Automated Setup:**
+**Clone Repository and Run Setup:**
 ```bash
+# First install git and clone repository
+sudo apt update && sudo apt install -y git
+git clone https://github.com/makesingularity/mu-bot-project.git
+cd mu-bot-project
+
 # Automated setup with hardware interfaces and Pi optimizations
 ./scripts/setup_pi.sh
 ```
@@ -140,8 +151,8 @@ source install/setup.bash
 # Test display compatibility first
 ./scripts/test_gazebo_display.sh
 
-# Test simulation environment (Gazebo Garden)
-ros2 launch sim/launch/emu_gazebo_garden.launch.py
+# Test simulation environment (Gazebo Sim 8)
+ros2 launch sim/launch/emu_gazebo_sim8.launch.py
 
 # Test vision processing (simulated)
 ros2 launch emu_vision emu_vision_launch.py simulation:=true
@@ -269,12 +280,12 @@ The automated scripts above handle all the manual steps automatically, but these
 
 #### Continue with Additional ROS 2 Packages (All users)
 ```bash
-# Install additional ROS 2 packages for Gazebo Garden
+# Install additional ROS 2 packages for Gazebo Sim 8
 sudo apt install \
-    ros-humble-ros-gz \
-    ros-humble-robot-state-publisher \
-    ros-humble-joint-state-publisher \
-    ros-humble-xacro \
+    ros-jazzy-ros-gz \
+    ros-jazzy-robot-state-publisher \
+    ros-jazzy-joint-state-publisher \
+    ros-jazzy-xacro \
     python3-colcon-common-extensions \
     python3-rosdep
 
@@ -382,16 +393,16 @@ arecord -f cd -t wav -d 5 test.wav
 aplay test.wav
 ```
 
-### 5. Simulation (Gazebo Garden)
+### 5. Simulation (Gazebo Sim 8)
 ```bash
 # Test display compatibility first (important for WSL users)
 ./scripts/test_gazebo_display.sh
 
-# Launch Gazebo Garden simulation environment
-ros2 launch sim/launch/emu_gazebo_garden.launch.py
+# Launch Gazebo Sim 8 simulation environment
+ros2 launch sim/launch/emu_gazebo_sim8.launch.py
 
 # For headless mode (recommended for WSL)
-ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false
+ros2 launch sim/launch/emu_gazebo_sim8.launch.py gui:=false
 
 # Start vision processing
 ros2 launch emu_vision emu_vision_launch.py
@@ -400,7 +411,7 @@ ros2 launch emu_vision emu_vision_launch.py
 ros2 topic echo /emu/report
 ```
 
-**Note**: Gazebo Classic (gazebo11) reached end-of-life in January 2025. This project now uses Gazebo Garden for future-proofing and continued support.
+**Note**: Gazebo Classic (gazebo11) reached end-of-life in January 2025. This project now uses Gazebo Sim 8 (Harmonic) which comes integrated with ROS 2 Jazzy for modern simulation capabilities.
 
 ## 📁 Repository Structure
 
@@ -514,16 +525,16 @@ python3 train_custom_models.py --model activity_classifier --export-onnx
 
 ### Basic Operation
 
-#### Gazebo Garden Simulation (Recommended)
+#### Gazebo Sim 8 Simulation (Recommended)
 ```bash
 # Test display compatibility first (no venv needed)
 ./scripts/test_gazebo_display.sh
 
 # Start headless simulation (works reliably in WSL - no venv needed)
-ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=false
+ros2 launch sim/launch/emu_gazebo_sim8.launch.py gui:=false
 
 # For GUI (if your display setup supports it - no venv needed)
-ros2 launch sim/launch/emu_gazebo_garden.launch.py gui:=true
+ros2 launch sim/launch/emu_gazebo_sim8.launch.py gui:=true
 
 # Start vision processing (venv recommended for Python nodes)
 source venv/bin/activate
@@ -566,8 +577,8 @@ python3 tests/integration_test.py
 
 ### Simulation Environment
 ```bash
-# Launch Gazebo Garden world (current, supported)
-ros2 launch sim/launch/emu_gazebo_garden.launch.py
+# Launch Gazebo Sim 8 world (current, supported)
+ros2 launch sim/launch/emu_gazebo_sim8.launch.py
 
 # Start vision processing
 ros2 launch emu_vision emu_vision_launch.py
@@ -778,7 +789,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 # sudo apt-add-repository "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main"
 
 sudo apt update
-sudo apt install ros-humble-desktop
+sudo apt install ros-jazzy-desktop
 ```
 
 #### Gazebo Garden GUI Issues in WSL

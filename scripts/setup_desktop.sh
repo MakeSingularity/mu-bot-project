@@ -8,6 +8,44 @@ echo "🖥️  Emu Droid Desktop Development Station Setup"
 echo "=============================================="
 echo ""
 
+# Prerequisites check
+echo "🔍 Checking prerequisites..."
+
+# Check if running as root
+if [ "$EUID" -eq 0 ]; then
+    echo "❌ Please do not run this script as root"
+    echo "   Run as a regular user with sudo access"
+    exit 1
+fi
+
+# Check sudo access
+if ! sudo -n true 2>/dev/null; then
+    echo "🔐 This script requires sudo access. Please enter your password when prompted."
+    sudo -v
+fi
+
+# Check internet connectivity
+if ! ping -c 1 google.com &> /dev/null; then
+    echo "❌ No internet connection detected"
+    echo "   Please check your network connection and try again"
+    exit 1
+fi
+
+# Check available disk space (at least 5GB free)
+available_space=$(df . | awk 'NR==2 {print $4}')
+if [ "$available_space" -lt 5242880 ]; then # 5GB in KB
+    echo "⚠️  Warning: Low disk space detected"
+    echo "   Available: $(df -h . | awk 'NR==2 {print $4}')"
+    echo "   Recommended: At least 5GB free space"
+    read -p "Continue anyway? (y/N): " -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+echo "✅ Prerequisites check passed"
+echo ""
+
 # Check if running on Ubuntu 24.04
 if ! grep -q "noble" /etc/os-release; then
     echo "⚠️  Warning: This script is designed for Ubuntu 24.04 LTS (Noble)"
@@ -33,12 +71,9 @@ sudo apt install -y \
     python3-colcon-common-extensions \
     python3-rosdep
 
-echo "Installing Gazebo Garden..."
-# Add Gazebo Garden repository
-sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-sudo apt update
-sudo apt install -y gz-garden
+echo "Gazebo Sim 8 is included with ROS 2 Jazzy desktop packages..."
+# Note: ROS 2 Jazzy includes ros-jazzy-gz-sim-vendor which provides Gazebo Sim 8 (Harmonic)
+# No need to install separate Gazebo packages as they're included with ros-jazzy-ros-gz
 
 # Initialize rosdep
 if [ ! -d /etc/ros/rosdep ]; then
@@ -51,6 +86,9 @@ echo "🔧 Step 2: Installing system dependencies..."
 sudo apt install -y \
     portaudio19-dev \
     python3-dev \
+    python3-venv \
+    python3-pip \
+    python3.12-venv \
     build-essential \
     libasound2-dev \
     libffi-dev \
@@ -64,11 +102,36 @@ sudo apt install -y \
 
 echo ""
 echo "🐍 Step 3: Setting up Python environment..."
+
+# Clean up any corrupted virtual environment
+if [ -d "venv" ] && [ ! -f "venv/bin/activate" ]; then
+    echo "Removing corrupted virtual environment..."
+    rm -rf venv
+fi
+
+# Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
+    echo "Creating Python virtual environment..."
     python3 -m venv venv
-    echo "Created Python virtual environment"
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to create virtual environment. Checking Python installation..."
+        python3 --version
+        which python3
+        echo "Trying alternative venv creation method..."
+        /usr/bin/python3 -m venv venv
+    fi
+    echo "✅ Created Python virtual environment"
 else
-    echo "Python virtual environment already exists"
+    echo "✅ Python virtual environment already exists"
+fi
+
+# Verify virtual environment was created successfully
+if [ ! -f "venv/bin/activate" ]; then
+    echo "❌ Virtual environment creation failed - activate script not found"
+    echo "Python version: $(python3 --version)"
+    echo "Available Python packages:"
+    dpkg -l | grep python3-venv
+    exit 1
 fi
 
 # Activate virtual environment
@@ -151,7 +214,7 @@ echo "📋 Next Steps:"
 echo "1. Open a new terminal (to load environment variables)"
 echo "2. Test simulation (no venv needed for ROS/Gazebo):"
 echo "   cd $(pwd)"
-echo "   ros2 launch sim/launch/emu_gazebo_garden.launch.py"
+echo "   ros2 launch sim/launch/emu_gazebo_sim8.launch.py"
 echo ""
 echo "3. Test vision processing (venv recommended for Python nodes):"
 echo "   source venv/bin/activate"
