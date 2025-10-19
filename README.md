@@ -53,8 +53,8 @@ Desktop (ROS Master) ←→ Laptop (Remote Dev) ←→ Droid (Hardware)
 
 ### 1️⃣ Clone Repository (All Environments)
 ```bash
-git clone https://github.com/makesingularity/mu-bot-project.git
-cd mu-bot-project
+git clone https://github.com/makesingularity/mu-bot-project.git mu-bot
+cd mu-bot
 ```
 
 ### 2️⃣ Choose Your Environment Setup
