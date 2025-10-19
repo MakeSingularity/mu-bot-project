@@ -1,8 +1,8 @@
 # Emu Droid Companion Robot 🦆🤖
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![ROS 2 Jazzy](https://img.shields.io/badge/ROS_2-Jazzy-blue.svg)](https://docs.ros.org/en/jazzy/)
-[![Python 3.12+](https://img.shields.io/badge/Python-3.12+-green.svg)](https://www.python.org/)
+[![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-blue.svg)](https://docs.ros.org/en/humble/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org/)
 [![Hailo AI](https://img.shields.io/badge/Hailo_AI-26_TOPS-purple.svg)](https://hailo.ai/)
 
 A bipedal companion robot inspired by an emu, designed for observe-and-report tasks using cutting-edge AI acceleration and open-source hardware.
@@ -49,6 +49,8 @@ Desktop (ROS Master) ←→ Laptop (Remote Dev) ←→ Droid (Hardware)
 
 **Prerequisites**: Ubuntu 22.04 LTS, Git, internet connection
 
+> **⚠️ COMPATIBILITY REQUIREMENT**: All devices must run **Ubuntu 22.04 LTS** with **Python 3.10** for ROS 2 Humble compatibility. See [COMPATIBILITY.md](COMPATIBILITY.md) for full requirements.
+
 > **✨ New in v2.1**: Setup scripts now automatically handle all common issues including virtual environment conflicts, ROS 2 middleware configuration, and path resolution. Scripts work from any directory!
 
 ### 1️⃣ Clone Repository (All Environments)
@@ -82,12 +84,15 @@ cd mu-bot
 #### 🤖 Raspberry Pi Droid Hardware
 
 **Prerequisites:**
-1. **OS**: Flash **Raspberry Pi OS Desktop 64-bit** (latest version) to your SD card
+1. **OS**: Flash **Raspberry Pi OS Desktop 64-bit (Legacy/Ubuntu 22.04 base)** to your SD card
+   - ⚠️ **CRITICAL**: Do NOT use Debian 13 (trixie) - incompatible with ROS 2 Humble
+   - ✅ **Required**: Ubuntu 22.04 base or Raspberry Pi OS Legacy for Python 3.10 compatibility
 2. **Initial Setup**: Complete the basic Pi setup wizard:
    - Set username/password
    - Enable SSH (for remote access)
    - Connect to WiFi
    - Update system: `sudo apt update && sudo apt upgrade -y`
+   - **Verify Python**: Run `python3 --version` - must be 3.10.x
 3. **Hardware**: Ensure your Pi 5 has adequate power supply (5V/5A recommended)
 
 **Automated Setup:**

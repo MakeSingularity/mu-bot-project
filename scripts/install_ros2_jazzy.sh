@@ -1,49 +1,44 @@
 #!/bin/bash
 # Unified ROS 2 Jazzy Installation Script
-# Cross-platform installer for Ubuntu and Debian systems
+# Ubuntu 24.04 LTS (Noble) - Cross-platform installer
 
 set -e  # Exit on any error
 
-echo "🚀 ROS 2 Jazzy Cross-Platform Installer"
-echo "======================================="
+echo "🚀 ROS 2 Jazzy Installer (Ubuntu 24.04+ Required)"
+echo "================================================"
 echo ""
 
-# Detect OS and set appropriate repository
-if grep -q "ubuntu" /etc/os-release; then
-    echo "✅ Detected Ubuntu"
-    DISTRO=$(lsb_release -cs)
-    echo "Using Ubuntu $DISTRO repository"
-
-    # Check if Ubuntu version supports Jazzy
-    case "$DISTRO" in
-        "noble"|"jammy")
-            echo "✅ Ubuntu $DISTRO supports ROS 2 Jazzy"
-            ;;
-        *)
-            echo "⚠️  Ubuntu $DISTRO may not have official Jazzy support, using Noble packages"
-            DISTRO="noble"  # ROS 2 Jazzy is primarily built for Ubuntu 24.04 Noble
-            ;;
-    esac
-
-elif grep -q "debian" /etc/os-release; then
-    echo "✅ Detected Debian"
-    DEBIAN_VERSION=$(grep VERSION_ID /etc/os-release | cut -d'"' -f2)
-    echo "Debian version: $DEBIAN_VERSION"
-
-    # Debian 13 (trixie) with Python 3.13 works well with Jazzy
-    if [[ "$DEBIAN_VERSION" -ge "12" ]]; then
-        DISTRO="noble"  # Use Ubuntu 24.04 Noble packages for modern Debian
-        echo "Using Ubuntu Noble repository (compatible with modern Debian)"
-    else
-        DISTRO="jammy"  # Fallback for older Debian
-        echo "Using Ubuntu Jammy repository (fallback for older Debian)"
-    fi
-else
-    echo "⚠️  Unknown OS detected, defaulting to Ubuntu Noble"
-    DISTRO="noble"
+# Verify Ubuntu 24.04+ requirement
+if ! grep -q "ubuntu" /etc/os-release; then
+    echo "❌ This installer requires Ubuntu"
+    echo "Please use Ubuntu 24.04 LTS or newer"
+    exit 1
 fi
 
-# Install prerequisites
+DISTRO=$(lsb_release -cs)
+VERSION=$(lsb_release -rs)
+
+# Check Ubuntu version compatibility
+case "$DISTRO" in
+    "noble")
+        echo "✅ Ubuntu 24.04 Noble - Perfect for ROS 2 Jazzy"
+        ;;
+    "oracular"|"plucky")
+        echo "✅ Ubuntu $VERSION ($DISTRO) - Compatible with ROS 2 Jazzy"
+        DISTRO="noble"  # Use Noble packages for newer versions
+        ;;
+    "jammy"|"focal")
+        echo "❌ Ubuntu $VERSION ($DISTRO) is too old for ROS 2 Jazzy"
+        echo "Please upgrade to Ubuntu 24.04 LTS"
+        exit 1
+        ;;
+    *)
+        echo "⚠️  Ubuntu $VERSION ($DISTRO) - Using Noble packages"
+        DISTRO="noble"
+        ;;
+esac
+
+echo "Using Ubuntu $DISTRO repository for ROS 2 Jazzy packages"# Install prerequisites
 echo "📦 Installing prerequisites..."
 sudo apt update
 sudo apt install -y curl gnupg lsb-release apt-transport-https ca-certificates
