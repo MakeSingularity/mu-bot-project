@@ -244,6 +244,43 @@ sudo apt update
 sudo apt install -y code
 
 echo "✅ VS Code installed successfully"
+
+# Install recommended VS Code extensions
+echo "Installing recommended VS Code extensions for Pi development..."
+EXTENSIONS=(
+    "github.copilot"
+    "github.copilot-chat"
+    "ms-python.python"
+    "ms-python.flake8"
+    "ms-python.black-formatter"
+    "ms-vscode.cpptools"
+    "ms-vscode.cmake-tools"
+    "twxs.cmake"
+    "redhat.vscode-yaml"
+    "ms-vscode.vscode-json"
+    "streetsidesoftware.code-spell-checker"
+    "ms-python.pylint"
+    "ms-toolsai.jupyter"
+)
+
+# Check if code command is accessible before installing extensions
+if command -v code > /dev/null 2>&1; then
+    for ext in "${EXTENSIONS[@]}"; do
+        if code --list-extensions 2>/dev/null | grep -q "^$ext$"; then
+            echo "✅ Extension $ext already installed"
+        else
+            echo "Installing extension: $ext"
+            if code --install-extension "$ext" --force 2>/dev/null; then
+                echo "✅ Installed $ext"
+            else
+                echo "⚠️  Failed to install $ext (may need manual installation)"
+            fi
+        fi
+    done
+else
+    echo "⚠️  VS Code command not accessible - extensions will need manual installation"
+fi
+
 echo "   GUI Mode: Connect monitor/VNC and run 'code .'"
 echo "   SSH Mode: Use VS Code Remote-SSH from desktop/laptop"
 echo "   Terminal Mode: Use 'code --help' for CLI options"
