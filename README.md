@@ -1,8 +1,8 @@
 # Emu Droid Companion Robot 🦆🤖
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-blue.svg)](https://docs.ros.org/en/humble/)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org/)
+[![ROS 2 Jazzy](https://img.shields.io/badge/ROS_2-Jazzy-blue.svg)](https://docs.ros.org/en/jazzy/)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12+-green.svg)](https://www.python.org/)
 [![Hailo AI](https://img.shields.io/badge/Hailo_AI-26_TOPS-purple.svg)](https://hailo.ai/)
 
 A bipedal companion robot inspired by an emu, designed for observe-and-report tasks using cutting-edge AI acceleration and open-source hardware.
@@ -288,8 +288,8 @@ sudo rosdep init
 rosdep update
 
 # Source ROS 2 (add to ~/.bashrc for permanent setup)
-source /opt/ros/humble/setup.bash
-echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+source /opt/ros/jazzy/setup.bash
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 ```
 
 ### 2. Repository Setup
@@ -328,7 +328,7 @@ pip install -r requirements-pi.txt
 ### 3. ROS 2 Workspace Setup
 ```bash
 # Make sure ROS 2 is sourced
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 
 # Install workspace-specific dependencies
 rosdep install --from-paths src --ignore-src -r -y
@@ -690,8 +690,8 @@ python3 tests/validate_pose_estimation.py
 **Solution**: ROS 2 packages are installed via `apt`, not `pip`
 ```bash
 # Install ROS 2 first
-sudo apt install ros-humble-desktop
-source /opt/ros/humble/setup.bash
+sudo apt install ros-jazzy-desktop
+source /opt/ros/jazzy/setup.bash
 
 # Then install Python packages
 pip install -r requirements.txt

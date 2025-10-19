@@ -53,19 +53,19 @@ sudo apt install -y \
 # Note: software-properties-common not needed for Debian-based Pi OS
 
 # Install ROS 2 using unified cross-platform installer
-$(dirname "$0")/install_ros2_humble.sh
+$(dirname "$0")/install_ros2_jazzy.sh
 
-echo "Installing ROS 2 Humble (Pi-optimized)..."
+echo "Installing ROS 2 Jazzy (Pi-optimized)..."
 # Install ROS base (lighter than desktop for Pi)
 sudo apt install -y \
-    ros-humble-ros-base \
-    ros-humble-camera-info-manager \
-    ros-humble-image-transport \
-    ros-humble-cv-bridge \
-    ros-humble-vision-msgs \
-    ros-humble-geometry-msgs \
-    ros-humble-std-msgs \
-    ros-humble-sensor-msgs \
+    ros-jazzy-ros-base \
+    ros-jazzy-camera-info-manager \
+    ros-jazzy-image-transport \
+    ros-jazzy-cv-bridge \
+    ros-jazzy-vision-msgs \
+    ros-jazzy-geometry-msgs \
+    ros-jazzy-std-msgs \
+    ros-jazzy-sensor-msgs \
     python3-colcon-common-extensions \
     python3-rosdep
 
@@ -202,7 +202,7 @@ pip install -r requirements-pi.txt
 echo ""
 echo "🏗️  Step 8: Building ROS workspace (Pi-optimized)..."
 # Source ROS 2
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 
 # Install workspace dependencies
 rosdep install --from-paths src --ignore-src -r -y
@@ -230,8 +230,8 @@ echo ""
 echo "⚙️  Step 9: Configuring environment..."
 
 # Add ROS sourcing to bashrc
-if ! grep -q "source /opt/ros/humble/setup.bash" ~/.bashrc; then
-    echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+if ! grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc; then
+    echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
     echo "Added ROS 2 sourcing to ~/.bashrc"
 fi
 
@@ -273,7 +273,7 @@ After=network.target
 Type=forking
 User=pi
 WorkingDirectory=$(pwd)
-ExecStart=/bin/bash -c 'source /opt/ros/humble/setup.bash && source $(pwd)/install/setup.bash && source $(pwd)/venv/bin/activate && ros2 launch emu_vision emu_vision_launch.py hardware:=true'
+ExecStart=/bin/bash -c 'source /opt/ros/jazzy/setup.bash && source $(pwd)/install/setup.bash && source $(pwd)/venv/bin/activate && ros2 launch emu_vision emu_vision_launch.py hardware:=true'
 Restart=always
 RestartSec=10
 

@@ -19,19 +19,19 @@ if ! grep -q "jammy" /etc/os-release; then
     fi
 fi
 
-echo "📦 Step 1: Installing ROS 2 Humble..."
+echo "📦 Step 1: Installing ROS 2 Jazzy..."
 # Install ROS 2 using unified cross-platform installer
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/install_ros2_humble.sh"
+"$SCRIPT_DIR/install_ros2_jazzy.sh"
 
 echo "Installing ROS 2 desktop packages..."
 sudo apt install -y \
-    ros-humble-desktop \
-    ros-humble-ros-gz \
-    ros-humble-robot-state-publisher \
-    ros-humble-joint-state-publisher \
-    ros-humble-xacro \
-    ros-humble-controller-manager \
+    ros-jazzy-desktop \
+    ros-jazzy-ros-gz \
+    ros-jazzy-robot-state-publisher \
+    ros-jazzy-joint-state-publisher \
+    ros-jazzy-xacro \
+    ros-jazzy-controller-manager \
     python3-colcon-common-extensions \
     python3-rosdep
 
@@ -129,7 +129,7 @@ pip install -r requirements-dev.txt
 echo ""
 echo "🏗️  Step 5: Building ROS workspace..."
 # Source ROS 2
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 
 # Install workspace dependencies
 rosdep install --from-paths src --ignore-src -r -y
@@ -162,8 +162,8 @@ echo ""
 echo "⚙️  Step 6: Configuring environment..."
 
 # Add ROS sourcing to bashrc if not already present
-if ! grep -q "source /opt/ros/humble/setup.bash" ~/.bashrc; then
-    echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+if ! grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc; then
+    echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
     echo "Added ROS 2 sourcing to ~/.bashrc"
 fi
 
