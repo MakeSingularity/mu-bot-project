@@ -35,9 +35,7 @@ sudo raspi-config nonint do_spi 0      # Enable SPI
 sudo raspi-config nonint do_camera 0   # Enable Camera
 sudo raspi-config nonint do_ssh 0      # Enable SSH
 
-# Configure GPU memory split for camera processing
-sudo raspi-config nonint do_memory_split 128
-
+# Note: GPU memory split is now automatically managed by the firmware in newer Pi OS versions
 echo "Hardware interfaces configured. Will require reboot later."
 
 echo ""
